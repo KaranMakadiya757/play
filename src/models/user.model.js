@@ -41,7 +41,11 @@ const userSchema = new Schema(
         password: {
             type: String,
             required: [true, "Please Enter Valid password"]
+        },
+        refreshToken: {
+            type: String
         }
+
     },
     { timestamps: true }
 )
