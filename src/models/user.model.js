@@ -43,9 +43,7 @@ const userSchema = new Schema(
             required: [true, "Please Enter Valid password"]
         }
     },
-    {
-        timestamps: true
-    }
+    { timestamps: true }
 )
 
 userSchema.pre("save", async function (next) {
