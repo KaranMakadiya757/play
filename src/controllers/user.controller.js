@@ -11,7 +11,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All fileds are required")
     }
 
-    const existinguser = User.findOne({
+    const existinguser = await User.findOne({
         $or: [{ username }, { email }]
     })
 
@@ -35,7 +35,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     const user = await User.create({
         fullname,
-        username: username.toLowercase(),
+        username: username.toLowerCase(),
         email,
         password,
         avatar: avatar.url,
