@@ -2,8 +2,10 @@ import express from "express"
 import cors from "cors"
 import cookieparser from "cookie-parser"
 
+// EXPRESS APP CREATION 
 const app = express()
 
+// USING CORS MIDDLEWARE 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true
