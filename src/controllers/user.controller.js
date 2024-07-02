@@ -3,6 +3,7 @@ import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { User } from '../models/user.model.js'
 import { uploadOnCloudinary } from "../utils/fileUpload.js"
+import jwt from "jsonwebtoken"
 
 const registerUser = asyncHandler(async (req, res) => {
     const { fullname, email, username, password } = req.body
@@ -89,8 +90,6 @@ const loginUser = asyncHandler(async (req, res) => {
 
     // GET USERNAME , EMAIL AND PASSWORD FROM THE REQUEST BODY
     const { username, password, email } = req.body
-    console.log(req.body)
-
 
     // THROW NEW ERROR IF THE USERNAME OR EMAIL DOESNOT EXISTS IN REQUEST BODY
     if (!username && !email) {
@@ -107,10 +106,12 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "user doesn't exist")
     }
 
+    // console.log("user", user)
 
     // CHECK WEATHER THE PASSWORD IS CORRECT AND THROW ERROR IS THE PASSWORD IS INCORRECT
-    const isPasswordCorrect = await user.isPasswordCorrect(password)
-    if (!isPasswordCorrect) {
+    console.log("password", password)
+    const isPasswordValid = await user.isPasswordCorrect(password)
+    if (!isPasswordValid) {
         throw new ApiError(401, "Invalid User Credentials")
     }
 
@@ -145,7 +146,6 @@ const loginUser = asyncHandler(async (req, res) => {
         )
 })
 
-
 const logoutUser = asyncHandler(async (req, res) => {
 
     await User.findByIdAndUpdate(
@@ -166,11 +166,63 @@ const logoutUser = asyncHandler(async (req, res) => {
     }
 
     return res
-    .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refereshToken", options)
-    .json( new ApiResponse(200, {}, "Logged out sucessfully"))
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refereshToken", options)
+        .json(new ApiResponse(200, {}, "Logged out sucessfully"))
 
 })
 
-export { registerUser, loginUser, logoutUser }
+const refereshAccessToken = asyncHandler(async (req, res) => {
+    console.log("aavi gyu")
+
+    // GET THE TOKEN FROM COOKIES OR REQUEST BODY
+    const incomingRefereshToken = req.cookies.refereshToken || req.body.refereshToken
+
+    //  THROW ERROR IF THERE ARE NO TOKENS 
+    if (!incomingRefereshToken) {
+        throw new ApiError(401, "Unauthorized Request")
+    }
+
+    try {
+        //  VERIFY THE TOKEN
+        const decodedToken = jwt.verify(incomingRefereshToken, process.env.REFERSH_TOKEN_SECRET)
+
+        // GET THE USER FROM THE DATABASE
+        const user = await User.findById(decodedToken._id)
+
+        //  THROW ERROR UF THERE ARE NO USER ASSOCIATED WITH THE GIVEN REFERESH TOKEN
+        if (!user) {
+            throw new ApiError(401, "Invalid Referesh token")
+        }
+
+        // CHECK WEATHER INCOMING REFERESH TOKEN AND REFERESH TOKEN STORED IN DB ARE SAME OR NOT
+        if (incomingRefereshToken !== user?.refereshToken) {
+            throw new ApiError(401, "Referesh Token expired or used")
+        }
+
+        // GENERATE NEW ACCESSTOKEN AND REFERESHTOKEN
+        const { accessToken, newrefereshToken } = await generateAccessAndRefereshToken(user._id)
+
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refereshToken", newrefereshToken, options)
+            .json(new ApiResponse(
+                200,
+                { accessToken, refereshToken: newrefereshToken },
+                "Referesh Token generated sucessfully"
+            ))
+    } catch (error) {
+        throw new ApiError(401, error?.message || "invalid referesh token")
+    }
+})
+
+export { registerUser, loginUser, logoutUser, refereshAccessToken }
+
+
