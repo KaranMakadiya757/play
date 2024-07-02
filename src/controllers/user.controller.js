@@ -54,9 +54,11 @@ const registerUser = asyncHandler(async (req, res) => {
         coverimage: coverimage?.url || "",
     })
 
+    console.log("created user", user)
+
     // GET THE CREATED USER WITHOUT THE PASSWORD AND REFERESH FIELDS AND THROW ERROR IF USER DOES NOT EXISTS 
     const createduser = await User.findById(user._id).select(
-        "-password -refreshToken"
+        "-password -refereshToken"
     )
 
     if (!createduser) {
@@ -77,8 +79,10 @@ const generateAccessAndRefereshToken = async (userId) => {
         const accessToken = await user.generateAccessToken()
         const refereshToken = await user.generateRefershToken()
 
+
         user.refereshToken = refereshToken
         await user.save({ validateBeforeSave: false })
+
 
         return { accessToken, refereshToken }
     } catch (error) {
@@ -106,10 +110,7 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "user doesn't exist")
     }
 
-    // console.log("user", user)
-
     // CHECK WEATHER THE PASSWORD IS CORRECT AND THROW ERROR IS THE PASSWORD IS INCORRECT
-    console.log("password", password)
     const isPasswordValid = await user.isPasswordCorrect(password)
     if (!isPasswordValid) {
         throw new ApiError(401, "Invalid User Credentials")
@@ -120,7 +121,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const { accessToken, refereshToken } = await generateAccessAndRefereshToken(user._id)
 
     // GET THE LOGGED IN USER
-    const loggedInUser = await User.findById(user._id).select("-password -referefereshToken")
+    const loggedInUser = await User.findById(user._id).select("-password -refereshToken")
 
     // CREATE THE COOKIE 
     const options = {
@@ -174,7 +175,6 @@ const logoutUser = asyncHandler(async (req, res) => {
 })
 
 const refereshAccessToken = asyncHandler(async (req, res) => {
-    console.log("aavi gyu")
 
     // GET THE TOKEN FROM COOKIES OR REQUEST BODY
     const incomingRefereshToken = req.cookies.refereshToken || req.body.refereshToken
@@ -191,10 +191,12 @@ const refereshAccessToken = asyncHandler(async (req, res) => {
         // GET THE USER FROM THE DATABASE
         const user = await User.findById(decodedToken._id)
 
+
         //  THROW ERROR UF THERE ARE NO USER ASSOCIATED WITH THE GIVEN REFERESH TOKEN
         if (!user) {
             throw new ApiError(401, "Invalid Referesh token")
         }
+
 
         // CHECK WEATHER INCOMING REFERESH TOKEN AND REFERESH TOKEN STORED IN DB ARE SAME OR NOT
         if (incomingRefereshToken !== user?.refereshToken) {
@@ -223,6 +225,218 @@ const refereshAccessToken = asyncHandler(async (req, res) => {
     }
 })
 
-export { registerUser, loginUser, logoutUser, refereshAccessToken }
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+
+    // GET THE OLD AND NEW PASSWORD FROM THE REQUEST BODY
+    const { oldPassword, newPassword } = req.body
+
+    // FIND THE USER BY THE USER ID
+    const user = await User.findById(req.user?._id)
+
+    // CHECK WEATHER THE OLD PASSWORD IS VALID OR NOT
+    const isPasswordValid = await user.isPasswordCorrect(oldPassword)
+
+    // IF OLD PASSWORD IS NOT VALID THEN THROW NEW ERROR
+    if (!isPasswordValid) {
+        throw new ApiError(400, "Invalid password")
+    }
+
+    //  IF THE PASSWORD IS VALID THEN UPDATE IT IN THE DATABASE
+    user.password = newPassword
+    await user.save({ validateBeforeSave: false })
+
+    // RETURN THE RESPONSE
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Password Changed sucessfully"))
+
+})
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    return res
+        .status(200)
+        .json(new ApiResponse(200, req.user, "User fetched sucessfully"))
+})
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+
+    // GET THE FULLNAME AND EMAIL FROM THE REQUEST BODY
+    const { fullname, email } = req.body
+
+    //  THROW ERROR IF THERE ARE NO FULLNAME OR EMAIL
+    if (!fullname || !email) {
+        throw new ApiError(400, "all fields are required")
+    }
+
+    // FIND THE USER BY THE USER ID AND UPDATE THE INFORMATION
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: { fullname, email }
+        },
+        {
+            new: true,
+        }
+    ).select("-password")
+
+    //  RETURN THE RESPONSE
+    return res
+        .status(200)
+        .json(new ApiResponse(200, { user }, "Account details updated sucessfully"))
+})
+
+const updateUserAvatar = asyncHandler(async (req, res) => {
+
+    // GET THE LOCAL FILE PATH OF AVATAR GIVEN BY MULTER MIDDLEWARE
+    const avataeLocalpath = req.file?.path
+
+    // THROW ERROR IF THERE ARE NO FILES 
+    if (!avataeLocalpath) {
+        throw new ApiError(400, "Please upload avatar image")
+    }
+
+    // UPLOAD THE IMAGE ON CLOUDINARY
+    const avatar = await uploadOnCloudinary(avataeLocalpath)
+
+    // THROW ERROR IF THERRE ARE ANY ERROR WHILE UPLOADING THE IMAGE
+    if (!avatar.url) {
+        throw new ApiError(400, "Avatar upload failed")
+    }
+
+    // FIND THE USER BY THE USER ID AND UPDATE THE AVTAR IMAGE
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: { avatar: avatar.url }
+        },
+        {
+            new: true,
+        }
+    ).select("-password -refereshToken")
+
+    // RETURN THE RESPONSE
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "Avatar updated sucessfully"))
+})
+
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+    // GET THE LOCAL FILE PATH OF COVER IMAGE GIVEN BY MULTER MIDDLEWARE
+    const coverImageLocalPath = req.file?.path
+
+    // THROW ERROR IF THERE ARE NO FILES
+    if (!coverImageLocalPath) {
+        throw new ApiError(400, "Please upload Cover image")
+    }
+
+    // UPLOAD THE IMAGE ON CLOUDINARY
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath)
+
+    // THROW ERROR IF THERRE ARE ANY ERROR WHILE UPLOADING THE IMAGE
+    if (!coverImage.url) {
+        throw new ApiError(400, "Cover Image upload failed")
+    }
+
+    // FIND THE USER BY THE USER ID AND UPDATE THE COVER IMAGE
+    const user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: { coverimage: coverImage.url }
+        },
+        {
+            new: true,
+        }
+    ).select("-password -refereshToken")
+
+    // RETURN THE RESPONSE
+    return res
+        .status(200)
+        .json(new ApiResponse(200, user, "Cover Image updated sucessfully"))
+})
+
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+    // GET THE USERNAME FROM THE REQUEST PARAMETER
+    const { username } = req.params
+
+    // THROW ERROR IF THERE ARE NO USERNAME
+    if (!username?.trim()) {
+        throw new ApiError(400, "username is missing")
+    }
+
+    // APPLY AGGERATE PIPELINE IN THE DB AND CREATE A CHANNEL OBJECT 
+    const channel = await User.aggregate([
+        {
+            $match: {
+                username: username?.toLowerCase()
+            }
+        },
+        {
+            $lookup: {
+                from: "Subscription",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "Subscription",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                subscribersCount: {
+                    $size: "$subscribers"
+                },
+                channelCount: {
+                    $size: "$subscribers"
+                },
+                isubscribed: {
+                    $cond: {
+                        if: { $in: [req.user._id, "$subscribers.subscriber"] },
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                fullname: 1,
+                username: 1,
+                subscribersCount: 1,
+                channelCount: 1,
+                isubscribed: 1,
+                avatar: 1,
+                coverimage: 1,
+                email: 1
+            }
+        }
+    ])
+    
+    // THROW ERROR IF THERE ARE NO CHANNEL 
+    if(!channel?.length){
+        throw new ApiError(404, "channel does not exists")
+    }
+
+    // RETURN THE RESPONSE
+    return res
+    .status(200)
+    .json(new ApiResponse(200, channel[0], "data fetched successfully"))
+})
 
 
+export {
+    registerUser,
+    loginUser,
+    logoutUser,
+    refereshAccessToken,
+    changeCurrentPassword,
+    getCurrentUser,
+    updateAccountDetails,
+    updateUserAvatar,
+    updateUserCoverImage
+}

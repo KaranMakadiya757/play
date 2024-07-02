@@ -32,6 +32,9 @@ const userSchema = new Schema(
         coverimage: {
             type: String,
         },
+        refereshToken: {
+            type: String,
+        },
         watchhistory: [
             {
                 type: Schema.Types.ObjectId,
@@ -41,25 +44,19 @@ const userSchema = new Schema(
         password: {
             type: String,
             required: [true, "Please Enter Valid password"]
-        },
-        refreshToken: {
-            type: String
         }
-
     },
     { timestamps: true }
 )
 
 userSchema.pre("save", async function (next) {
-    if(!this.isModified("password")) return next();
+    if (!this.isModified("password")) return next();
 
     this.password = await bcrypt.hash(this.password, 10)
     next()
 })
 
 userSchema.methods.isPasswordCorrect = async function (password) {
-    console.log(password)
-    console.log(this.password)
     return await bcrypt.compare(password, this.password)
 }
 
