@@ -3,10 +3,22 @@ import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { User } from '../models/user.model.js'
 import { uploadOnCloudinary } from "../utils/fileUpload.js"
+import { cookieOption } from "../constants.js";
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
 
 const registerUser = asyncHandler(async (req, res) => {
+    // get user details from frontend
+    // validation - not empty
+    // check if user already exists: username, email
+    // check for images, check for avatar
+    // upload them to cloudinary, avatar
+    // create user object - create entry in db
+    // remove password and refresh token field from response
+    // check for user creation
+    // return res
+
+
     const { fullname, email, username, password } = req.body
 
     // THROW ERROR IF ANY OF THE GIVEN FEILD ARE EMPTY 
@@ -23,7 +35,6 @@ const registerUser = asyncHandler(async (req, res) => {
     if (existinguser) {
         throw new ApiError(409, "user with Username or Email exists")
     }
-
 
     // GET THE LOCAL FILE PATH FOR THE AVATAR AND COVERIMAGE IMAGE AND THROW ERROR IF AVATAR DOESNOT EXISTS 
     const avatarLocalPath = req.files?.avatar[0]?.path;
@@ -55,8 +66,6 @@ const registerUser = asyncHandler(async (req, res) => {
         coverimage: coverimage?.url || "",
     })
 
-    console.log("created user", user)
-
     // GET THE CREATED USER WITHOUT THE PASSWORD AND REFERESH FIELDS AND THROW ERROR IF USER DOES NOT EXISTS 
     const createduser = await User.findById(user._id).select(
         "-password -refereshToken"
@@ -68,14 +77,13 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
     // RETURN THE RESPONSE IF THERE ARE NO ERRORS 
-    return res.status(201).json(
-        new ApiResponse(200, createduser, "user registered sucessfully")
-    )
+    return res
+        .status(201)
+        .json(new ApiResponse(200, createduser, "user registered sucessfully"))
 })
 
-const generateAccessAndRefereshToken = async (userId) => {
+const generateAccessAndRefereshToken = async (user) => {
     try {
-        const user = await User.findById(userId)
 
         const accessToken = await user.generateAccessToken()
         const refereshToken = await user.generateRefershToken()
@@ -86,6 +94,7 @@ const generateAccessAndRefereshToken = async (userId) => {
 
 
         return { accessToken, refereshToken }
+
     } catch (error) {
         throw new ApiError(500, "Something went wrong while generating the referesh and access tokens")
     }
@@ -101,13 +110,13 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "username or email are required")
     }
 
-    
+
     // FIND THE USER BY USERNAME OR EMAIL AND THROW ERROR IF USER DOES NOT EXISTS
     const user = await User.findOne({
         $or: [{ username }, { email }]
     })
     if (!user) {
-        throw new ApiError(400, "user doesn't exist")
+        throw new ApiError(400, "user does not exist")
     }
 
     // CHECK WEATHER THE PASSWORD IS CORRECT AND THROW ERROR IS THE PASSWORD IS INCORRECT
@@ -118,22 +127,16 @@ const loginUser = asyncHandler(async (req, res) => {
 
 
     // GENERATING THE FERERESH AND ACCESS TOKENS
-    const { accessToken, refereshToken } = await generateAccessAndRefereshToken(user._id)
+    const { accessToken, refereshToken } = await generateAccessAndRefereshToken(user)
 
     // GET THE LOGGED IN USER
     const loggedInUser = await User.findById(user._id).select("-password -refereshToken")
 
-    // CREATE THE COOKIE 
-    const options = {
-        httpOnly: true,
-        secure: true
-    }
-
     // RETURN THE RESPONSE 
     return res
         .status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refereshToken", refereshToken, options)
+        .cookie("accessToken", accessToken, cookieOption)
+        .cookie("refereshToken", refereshToken, cookieOption)
         .json(
             new ApiResponse(
                 200,
@@ -161,15 +164,10 @@ const logoutUser = asyncHandler(async (req, res) => {
         }
     )
 
-    const options = {
-        httpOnly: true,
-        secure: true
-    }
-
     return res
         .status(200)
-        .clearCookie("accessToken", options)
-        .clearCookie("refereshToken", options)
+        .clearCookie("accessToken", cookieOption)
+        .clearCookie("refereshToken", cookieOption)
         .json(new ApiResponse(200, {}, "Logged out sucessfully"))
 
 })
@@ -199,22 +197,17 @@ const refereshAccessToken = asyncHandler(async (req, res) => {
 
 
         // CHECK WEATHER INCOMING REFERESH TOKEN AND REFERESH TOKEN STORED IN DB ARE SAME OR NOT
-        if (incomingRefereshToken !== user?.refereshToken) {
-            throw new ApiError(401, "Referesh Token expired or used")
-        }
+        // if (incomingRefereshToken !== user?.refereshToken) {
+        //     throw new ApiError(401, "Referesh Token expired or used")
+        // }
 
         // GENERATE NEW ACCESSTOKEN AND REFERESHTOKEN
-        const { accessToken, newrefereshToken } = await generateAccessAndRefereshToken(user._id)
-
-        const options = {
-            httpOnly: true,
-            secure: true
-        }
+        const { accessToken, newrefereshToken } = await generateAccessAndRefereshToken(user)
 
         return res
             .status(200)
-            .cookie("accessToken", accessToken, options)
-            .cookie("refereshToken", newrefereshToken, options)
+            .cookie("accessToken", accessToken, cookieOption)
+            .cookie("refereshToken", newrefereshToken, cookieOption)
             .json(new ApiResponse(
                 200,
                 { accessToken, refereshToken: newrefereshToken },
@@ -392,7 +385,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                     $size: "$subscribers"
                 },
                 channelCount: {
-                    $size: "$subscribers"
+                    $size: "$subscribedTo"
                 },
                 isubscribed: {
                     $cond: {
@@ -416,20 +409,20 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             }
         }
     ])
-    
+
     // THROW ERROR IF THERE ARE NO CHANNEL 
-    if(!channel?.length){
+    if (!channel?.length) {
         throw new ApiError(404, "channel does not exists")
     }
 
     // RETURN THE RESPONSE
     return res
-    .status(200)
-    .json(new ApiResponse(200, channel[0], "data fetched successfully"))
+        .status(200)
+        .json(new ApiResponse(200, channel[0], "data fetched successfully"))
 })
 
 const getWatchHistory = asyncHandler(async (req, res) => {
-    
+
     const user = await User.aggregate([
         {
             $match: {
@@ -462,7 +455,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
                     },
                     {
                         $addFields: {
-                            owner: {$first: "$owner"}
+                            owner: { $first: "$owner" }
                         }
                     }
                 ]
@@ -471,12 +464,12 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     ])
 
     return res
-    .status(200)
-    .json(new ApiResponse(
-        200,
-        user[0].watchHistory,
-        "Watch History Fetched sucessfully"
-    ))
+        .status(200)
+        .json(new ApiResponse(
+            200,
+            user[0].watchHistory,
+            "Watch History Fetched sucessfully"
+        ))
 })
 
 
