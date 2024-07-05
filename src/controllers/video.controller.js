@@ -128,6 +128,10 @@ const getVideoById = asyncHandler(async (req, res) => {
 
     const { videoId } = req.params
 
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "invalid Video id")
+    }
+
 
     const video = await Video.findByIdAndUpdate(
         videoId,
@@ -185,6 +189,10 @@ const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     const { title, description } = req.body
 
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "invalid Video id")
+    }
+
     if (!title || !description) {
         throw new ApiError(400, "title and description are required !!")
     }
@@ -226,20 +234,28 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
 
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "invalid Video id")
+    }
+
     const deletedvideo = await Video.findByIdAndDelete(videoId)
 
-    if (!deleteVideo) {
+    if (!deletedvideo) {
         throw new ApiError(404, "video not found !!")
     }
 
     return res
         .status(200)
-        .json(new ApiResponse(200, deleteVideo, "Video deleted sucessfully !!"))
+        .json(new ApiResponse(200, {}, "Video deleted sucessfully !!"))
 
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params
+
+    if (!isValidObjectId(videoId)) {
+        throw new ApiError(400, "invalid Video id")
+    }
 
     const video = await Video.findById(videoId)
 
