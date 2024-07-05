@@ -6,14 +6,72 @@ import { ApiResponse } from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { uploadOnCloudinary } from "../utils/fileUpload.js"
 
+// ADD LIKE COUNT IN GET VIDEOS BY ID
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 10, query, userId, sortBy, sortType} = req.query
-    //TODO: get all videos based on query, sort, pagination
+    // check for the query parameters abd throw error if not found
+    // apply aggreagaation to access the list of videos
+    // apply pagination on output
+    // throw error if any 
+    // return the response
 
-    console.log(page , limit , query, sortBy, sortType, userId)
+    const { page = 1, limit = 10, query = "", sortBy = "title", sortType = 1 } = req.query
 
-    return null
+    const option = {
+        page,
+        limit
+    }
+
+    if (!Video.schema.path(sortBy)) {
+        throw new ApiError(400, "Please provide a valide field name for sorting")
+    }
+
+    const aggregateVideos = Video.aggregate([
+        {
+            $match: {
+                title: { $regex: query, $options: 'i' }
+            }
+        },
+        {
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+                pipeline: [
+                    {
+                        $project: {
+                            _id: 1,
+                            avatar: 1,
+                            username: 1,
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields: {
+                owner: { $first: "$owner" },
+            }
+        },
+        {
+            $sort: {
+                [sortBy]: parseInt(sortType)
+            }
+        }
+    ])
+
+    const videos = await Video.aggregatePaginate(aggregateVideos, option)
+
+
+    if (!videos) {
+        throw new ApiError(500, "server error")
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, videos, "Videos fetched sucessfully"))
+
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -70,7 +128,7 @@ const getVideoById = asyncHandler(async (req, res) => {
 
     const { videoId } = req.params
 
-    
+
     const video = await Video.findByIdAndUpdate(
         videoId,
         { $inc: { views: 1 } },
@@ -96,7 +154,7 @@ const getVideoById = asyncHandler(async (req, res) => {
                     {
                         $project: {
                             _id: 1,
-                            fullname: 1,
+                            avatar: 1,
                             username: 1,
                         }
                     }
