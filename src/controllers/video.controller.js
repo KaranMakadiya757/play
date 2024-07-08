@@ -1,6 +1,5 @@
 import mongoose, { isValidObjectId } from "mongoose"
 import { Video } from "../models/video.model.js"
-import { User } from "../models/user.model.js"
 import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
@@ -22,9 +21,9 @@ const getAllVideos = asyncHandler(async (req, res) => {
         limit
     }
 
-    if (!Video.schema.path(sortBy)) {
-        throw new ApiError(400, "Please provide a valide field name for sorting")
-    }
+    if (!Video.schema.path(sortBy)) throw new ApiError(400, "Please provide a valide field name for sorting")
+
+
 
     const aggregateVideos = Video.aggregate([
         {
@@ -63,10 +62,9 @@ const getAllVideos = asyncHandler(async (req, res) => {
 
     const videos = await Video.aggregatePaginate(aggregateVideos, option)
 
+    if (!videos) throw new ApiError(500, "server error")
 
-    if (!videos) {
-        throw new ApiError(500, "server error")
-    }
+
 
     return res
         .status(200)
@@ -83,23 +81,23 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
     const { title, description } = req.body
 
-    if (!title || !description) {
-        throw new ApiError(400, "please Provide title and description")
-    }
+    if (!title || !description) throw new ApiError(400, "please Provide title and description")
+
+
 
     const videoLocalPath = req.files?.videoFile[0]?.path;
     const thumbnailLocalPath = req.files?.thumbnail[0]?.path;
 
-    if (!videoLocalPath || !thumbnailLocalPath) {
-        throw new ApiError(400, "Video and Thumbnail are required")
-    }
+    if (!videoLocalPath || !thumbnailLocalPath) throw new ApiError(400, "Video and Thumbnail are required")
+
+
 
     const video = await uploadOnCloudinary(videoLocalPath)
     const thumbnail = await uploadOnCloudinary(thumbnailLocalPath)
 
-    if (!video || !thumbnail) {
-        throw new ApiError(400, "Video and Thumbnail are required")
-    }
+    if (!video || !thumbnail) throw new ApiError(400, "Video and Thumbnail are required")
+
+
 
     const createdvideo = await Video.create({
         title,
@@ -110,9 +108,9 @@ const publishAVideo = asyncHandler(async (req, res) => {
         owner: req.user._id
     })
 
-    if (!createdvideo) {
-        throw new ApiError(500, "server error")
-    }
+    if (!createdvideo) throw new ApiError(500, "server error")
+
+
 
     return res
         .status(201)
@@ -128,9 +126,8 @@ const getVideoById = asyncHandler(async (req, res) => {
 
     const { videoId } = req.params
 
-    if (!isValidObjectId(videoId)) {
-        throw new ApiError(400, "invalid Video id")
-    }
+    if (!isValidObjectId(videoId)) throw new ApiError(400, "invalid Video id")
+
 
 
     const video = await Video.findByIdAndUpdate(
@@ -138,9 +135,9 @@ const getVideoById = asyncHandler(async (req, res) => {
         { $inc: { views: 1 } },
     )
 
-    if (!video) {
-        throw new ApiError(404, "Video not found")
-    }
+    if (!video) throw new ApiError(404, "Video not found")
+
+
 
     const updatedvideo = await Video.aggregate([
         {
@@ -172,7 +169,7 @@ const getVideoById = asyncHandler(async (req, res) => {
         },
     ])
 
-    // TODO: FIND A BETTER VWAY TO MERGE THE VIEW UPDATE AND USER LOOKUP IN ONE AGGREGATION PIPELINE
+
 
     return res
         .status(200)
@@ -189,13 +186,10 @@ const updateVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     const { title, description } = req.body
 
-    if (!isValidObjectId(videoId)) {
-        throw new ApiError(400, "invalid Video id")
-    }
+    if (!isValidObjectId(videoId)) throw new ApiError(400, "invalid Video id")
+    if (!title || !description) throw new ApiError(400, "title and description are required !!")
 
-    if (!title || !description) {
-        throw new ApiError(400, "title and description are required !!")
-    }
+
 
     const thumbnailLocalPath = req.file?.path
 
@@ -203,11 +197,13 @@ const updateVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Please upload the thumbnail !!")
     }
 
+
+
     const thumbnail = await uploadOnCloudinary(thumbnailLocalPath)
 
-    if (!thumbnail) {
-        throw new ApiError(500, "thumbnail upload failed !!")
-    }
+    if (!thumbnail) throw new ApiError(500, "thumbnail upload failed !!")
+
+
 
     const updatedvideo = await Video.findByIdAndUpdate(
         videoId,
@@ -221,9 +217,9 @@ const updateVideo = asyncHandler(async (req, res) => {
         { new: true }
     )
 
-    if (!updateVideo) {
-        throw new ApiError(404, "video not found !!")
-    }
+    if (!updateVideo) throw new ApiError(404, "video not found !!")
+
+
 
     return res
         .status(200)
@@ -232,17 +228,18 @@ const updateVideo = asyncHandler(async (req, res) => {
 })
 
 const deleteVideo = asyncHandler(async (req, res) => {
+
     const { videoId } = req.params
 
-    if (!isValidObjectId(videoId)) {
-        throw new ApiError(400, "invalid Video id")
-    }
+    if (!isValidObjectId(videoId)) throw new ApiError(400, "invalid Video id")
+
+
 
     const deletedvideo = await Video.findByIdAndDelete(videoId)
 
-    if (!deletedvideo) {
-        throw new ApiError(404, "video not found !!")
-    }
+    if (!deletedvideo) throw new ApiError(404, "video not found !!")
+
+
 
     return res
         .status(200)
@@ -251,17 +248,19 @@ const deleteVideo = asyncHandler(async (req, res) => {
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
+
+
     const { videoId } = req.params
 
-    if (!isValidObjectId(videoId)) {
-        throw new ApiError(400, "invalid Video id")
-    }
+    if (!isValidObjectId(videoId)) throw new ApiError(400, "invalid Video id")
+
+
 
     const video = await Video.findById(videoId)
 
-    if (!video) {
-        throw new ApiError(404, "video not found !!")
-    }
+    if (!video) throw new ApiError(404, "video not found !!")
+
+
 
     const updatedvideo = await Video.findByIdAndUpdate(
         videoId,
@@ -273,10 +272,10 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
         { new: true }
     )
 
-    if (!updatedvideo) {
-        throw new ApiError(500, "internal server error !!!")
-    }
+    if (!updatedvideo) throw new ApiError(500, "internal server error !!!")
 
+
+        
     return res
         .status(200)
         .json(new ApiResponse(200, updatedvideo, "Status changed"))

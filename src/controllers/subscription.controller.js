@@ -12,9 +12,9 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
     const { channelId } = req.params
 
-    if (!isValidObjectId(channelId)) {
-        throw new ApiError(400, "Invalid Channel ID")
-    }
+    if (!isValidObjectId(channelId)) throw new ApiError(400, "Invalid Channel ID")
+
+
 
     const subobj = {
         subscriber: req.user._id,
@@ -23,12 +23,14 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
     const subscription = await Subscription.findOne(subobj)
 
+
+
     if (!subscription) {
         const newSubscriber = await Subscription.create(subobj)
 
-        if (!newSubscriber) {
-            throw new ApiError(500, "Something went wrong while adding subscription")
-        }
+        if (!newSubscriber) throw new ApiError(500, "Something went wrong while adding subscription")
+
+
 
         return res
             .status(201)
@@ -38,9 +40,9 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     else {
         const removedSubscription = await Subscription.deleteOne(subobj)
 
-        if (!removedSubscription) {
-            throw new ApiError(500, "Something went wrong while removing subscription")
-        }
+        if (!removedSubscription) throw new ApiError(500, "Something went wrong while removing subscription")
+
+
 
         return res
             .status(201)
@@ -53,9 +55,9 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 
     const { channelId } = req.params
 
-    if (!isValidObjectId(channelId)) {
-        throw new ApiError(400, "Invalid Channel ID")
-    }
+    if (!isValidObjectId(channelId)) throw new ApiError(400, "Invalid Channel ID")
+
+
 
     const subscriberList = await Subscription.aggregate([
         {
@@ -83,9 +85,9 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
         }
     ])
 
-    if (!subscriberList) {
-        throw new ApiError(500, "something went wrong while fetching the subscriber list")
-    }
+    if (!subscriberList) throw new ApiError(500, "something went wrong while fetching the subscriber list")
+
+
 
     return res
         .status(200)
@@ -96,9 +98,9 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const { subscriberId } = req.params
 
-    if (!isValidObjectId(subscriberId)) {
-        throw new ApiError(400, "Invalid Subscriber ID")
-    }
+    if (!isValidObjectId(subscriberId)) throw new ApiError(400, "Invalid Subscriber ID")
+
+
 
     const subscribedChannelList = await Subscription.aggregate([
         {
@@ -126,9 +128,9 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
         }
     ])
 
-    if (!subscribedChannelList) {
-        throw new ApiError(500, "something went wrong while fetching the subscribed channel list")
-    }
+    if (!subscribedChannelList) throw new ApiError(500, "something went wrong while fetching the subscribed channel list")
+
+
 
     return res
         .status(200)
