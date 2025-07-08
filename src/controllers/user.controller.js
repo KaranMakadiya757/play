@@ -95,7 +95,7 @@ const generateAccessAndRefreshToken = async (user) => {
 
         return { accessToken, refreshToken }
 
-    } catch (error) {
+    } catch {
         throw new ApiError(500, "Something went wrong while generating the referesh and access tokens")
     }
 }
