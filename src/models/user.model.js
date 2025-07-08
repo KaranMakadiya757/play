@@ -32,7 +32,7 @@ const userSchema = new Schema(
         coverimage: {
             type: String,
         },
-        refereshToken: {
+        refreshToken: {
             type: String,
         },
         watchhistory: [
@@ -74,7 +74,7 @@ userSchema.methods.generateAccessToken = function () {
         }
     )
 }
-userSchema.methods.generateRefershToken = function () {
+userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
             _id: this._id

@@ -8,7 +8,7 @@ import {
     updateVideo,
 } from "../controllers/video.controller.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { upload } from "../middlewares/multer.middleware.js"
+import { uploadVideos } from "../middlewares/multer.middleware.js"
 
 const router = Router();
 
@@ -18,7 +18,7 @@ router
     .route("/")
     .get(getAllVideos)
     .post(
-        upload.fields([
+        uploadVideos.fields([
             {
                 name: "videoFile",
                 maxCount: 1,
@@ -36,7 +36,7 @@ router
     .route("/:videoId")
     .get(getVideoById)
     .delete(deleteVideo)
-    .patch(upload.single("thumbnail"), updateVideo);
+    .patch(uploadVideos.single("thumbnail"), updateVideo);
 
 router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
 

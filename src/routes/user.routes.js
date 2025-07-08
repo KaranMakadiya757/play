@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { upload } from '../middlewares/multer.middleware.js'
+import { uploadPhotos } from '../middlewares/multer.middleware.js'
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
     changeCurrentPassword,
@@ -10,38 +10,63 @@ import {
     logoutUser,
     registerUser,
     updateAccountDetails,
-    updateUserAvatar,
-    updateUserCoverImage,
     refereshAccessToken
 } from "../controllers/user.controller.js";
 
+import {
+    changepasswordValidationSchema,
+    userLoginValidationSchema,
+    userUpdateValidationSchema,
+    userValidationSchema
+} from "../Validations/user.validator.js";
+
+import validate from "../middlewares/validation.middleware.js";
+
+// create router instance
 const userRouter = Router();
 
-userRouter
-    .route("/register")
-    .post(
-        upload.fields([
-            { name: 'avatar', maxCount: 1 },
-            { name: 'coverimage', maxCount: 1 }
-        ]),
-        registerUser
-    )
+// Reigster user
+userRouter.route("/register").post(
+    uploadPhotos.fields([
+        { name: 'avatar', maxCount: 1 },
+        { name: 'coverimage', maxCount: 1 }
+    ]),
+    validate(userValidationSchema),
+    registerUser
+)
 
-userRouter.route("/login").post(loginUser)
+// Login 
+userRouter.route("/login").post(validate(userLoginValidationSchema), loginUser)
 
-
-// SECURED ROUTES
-userRouter.route("/logout").post(verifyJWT, logoutUser)
+// Refresh Access Token
 userRouter.route("/referesh-token").post(refereshAccessToken)
 
-userRouter.route("/getcurrentuser").get(verifyJWT, getCurrentUser)
-userRouter.route("/c/:username").get(verifyJWT, getUserChannelProfile)
-userRouter.route("/history").get(verifyJWT, getWatchHistory)
+// SECURED ROUTES
+userRouter.use(verifyJWT)
 
-userRouter.route("/changeaccountdetails").patch(verifyJWT, updateAccountDetails)
-userRouter.route("/changepassword").patch(verifyJWT, changeCurrentPassword)
-userRouter.route("/changeavatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar)
-userRouter.route("/changecoverimage").patch(verifyJWT, upload.single("coverImage"), updateUserCoverImage)
+// Update User Details
+userRouter.route("/changeaccountdetails").patch(
+    uploadPhotos.fields([
+        { name: 'avatar', maxCount: 1 },
+        { name: 'coverimage', maxCount: 1 }
+    ]),
+    validate(userUpdateValidationSchema),
+    updateAccountDetails
+)
 
+// Get Current User Information
+userRouter.route("/getcurrentuser").get(getCurrentUser)
+
+// Get Channel Information By Channel Name
+userRouter.route("/c/:username").get(getUserChannelProfile)
+
+// Get Watch History
+userRouter.route("/history").get(getWatchHistory)
+
+// Change Password
+userRouter.route("/changepassword").patch(validate(changepasswordValidationSchema), changeCurrentPassword)
+
+// Logout
+userRouter.route("/logout").post(logoutUser)
 
 export default userRouter;
