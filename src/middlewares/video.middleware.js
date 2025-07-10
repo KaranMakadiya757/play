@@ -1,9 +1,9 @@
 import mongoose, { isValidObjectId } from "mongoose";
-import { Video } from "../../models/video.model.js";
-import { ApiError } from "../../utils/apiError.js"
-import { asyncHandler } from "../../utils/asyncHandler.js";
+import { Video } from "../models/video.model.js";
+import { ApiError } from "../utils/apiError.js"
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-const videoownerHandler = asyncHandler(
+const videoHandler = asyncHandler(
     async function (req, res, next) {
         // get the video id from params
         const { videoId } = req.params;
@@ -32,4 +32,4 @@ const videoownerHandler = asyncHandler(
     }
 )
 
-export default videoownerHandler
+export default videoHandler

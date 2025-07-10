@@ -3,7 +3,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js"
 import { upload } from "../middlewares/multer.middleware.js"
 import validate from '../middlewares/validation.middleware.js';
 import { videoValidationSchema } from '../Validations/video.validator.js';
-import videoownerHandler from '../middlewares/Ownership/videoowner.middleware.js';
+import videoHandler from '../middlewares/video.middleware.js';
 import {
     deleteVideo,
     getAllVideos,
@@ -40,21 +40,21 @@ router.route("/").post(
 );
 
 // Get Video By ID
-router.route("/:videoId").get(videoownerHandler, getVideoById);
+router.route("/:videoId").get(videoHandler, getVideoById);
 
 // Update Video By ID
 router.route("/:videoId").patch(
-    videoownerHandler,
+    videoHandler,
     upload.single("thumbnail"),
     validate(videoValidationSchema),
     updateVideo
 );
 
 // Toggle Publish
-router.route("/toggle/publish/:videoId").patch(videoownerHandler, togglePublishStatus);
+router.route("/toggle/publish/:videoId").patch(videoHandler, togglePublishStatus);
 
 // Delete Video By ID
-router.route("/:videoId").delete(videoownerHandler, deleteVideo);
+router.route("/:videoId").delete(videoHandler, deleteVideo);
 
 
 export default router
