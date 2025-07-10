@@ -5,7 +5,7 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { uploadOnCloudinary } from "../utils/fileUpload.js"
 
 // ADD LIKE COUNT IN GET VIDEOS BY ID
-export const getAllVideos = asyncHandler(async (req, res) => {
+const getAllVideos = asyncHandler(async (req, res) => {
     // Get The search params from the req query
     const {
         page = 1,
@@ -76,7 +76,7 @@ export const getAllVideos = asyncHandler(async (req, res) => {
 })
 
 // Upload a Video
-export const uploadVideo = asyncHandler(async (req, res) => {
+const uploadVideo = asyncHandler(async (req, res) => {
     // Get Video and Thumbnail files local paths
     const videoLocalPath = req.files?.video?.[0]?.path;
     const thumbnailLocalPath = req.files?.thumbnail?.[0]?.path;
@@ -126,7 +126,7 @@ export const uploadVideo = asyncHandler(async (req, res) => {
 })
 
 // Get Video by Id
-export const getVideoById = asyncHandler(async (req, res) => {
+const getVideoById = asyncHandler(async (req, res) => {
 
     // apply aggregation pipeline to fetch the video with the user details
     const updatedvideo = await Video.aggregate([
@@ -171,7 +171,7 @@ export const getVideoById = asyncHandler(async (req, res) => {
 })
 
 // Update Video
-export const updateVideo = asyncHandler(async (req, res) => {
+const updateVideo = asyncHandler(async (req, res) => {
 
     // Thumbnail Local Path
     const thumbnailLocalPath = req.file?.path;
@@ -205,7 +205,7 @@ export const updateVideo = asyncHandler(async (req, res) => {
 })
 
 // Toggle Publish Status
-export const togglePublishStatus = asyncHandler(async (req, res) => {
+const togglePublishStatus = asyncHandler(async (req, res) => {
 
     // Toggle video Status
     const updatedvideo = await Video.findByIdAndUpdate(
@@ -229,7 +229,7 @@ export const togglePublishStatus = asyncHandler(async (req, res) => {
 })
 
 // Delete Video
-export const deleteVideo = asyncHandler(async (req, res) => {
+const deleteVideo = asyncHandler(async (req, res) => {
 
     // Delete the video from db
     const deletedvideo = await Video.findByIdAndDelete(req.video._id);
@@ -243,3 +243,12 @@ export const deleteVideo = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "Video deleted sucessfully !!"));
 
 })
+
+export {
+    getAllVideos,
+    uploadVideo,
+    getVideoById,
+    updateVideo,
+    togglePublishStatus,
+    deleteVideo
+}

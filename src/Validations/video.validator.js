@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-export const videoValidationSchema = Joi.object({
+const videoValidationSchema = Joi.object({
     thumbnail: Joi.string()
         .optional(),
 
@@ -34,3 +34,7 @@ export const videoValidationSchema = Joi.object({
             "boolean.base": "isPublished must be a boolean value."
         })
 });
+
+export {
+    videoValidationSchema
+}
