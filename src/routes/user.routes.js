@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { uploadPhotos } from '../middlewares/multer.middleware.js'
+import { upload } from '../middlewares/multer.middleware.js'
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import {
     changeCurrentPassword,
@@ -27,7 +27,7 @@ const userRouter = Router();
 
 // Reigster user
 userRouter.route("/register").post(
-    uploadPhotos.fields([
+    upload.fields([
         { name: 'avatar', maxCount: 1 },
         { name: 'coverimage', maxCount: 1 }
     ]),
@@ -46,7 +46,7 @@ userRouter.use(verifyJWT)
 
 // Update User Details
 userRouter.route("/changeaccountdetails").patch(
-    uploadPhotos.fields([
+    upload.fields([
         { name: 'avatar', maxCount: 1 },
         { name: 'coverimage', maxCount: 1 }
     ]),

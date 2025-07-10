@@ -15,35 +15,26 @@ const storage = multer.diskStorage({
 	}
 })
 
-// ✅ Photo filter
-const photoFilter = (req, file, cb) => {
-	const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"]
-	if (allowedTypes.includes(file.mimetype)) {
-		cb(null, true)
+// ✅ File Filter
+const fileFilter = (req, file, cb) => {
+	if (["video"]?.includes(file.fieldname)) {
+		const allowedTypes = ["video/mp4", "video/mkv", "video/webm"];
+		if (allowedTypes.includes(file.mimetype)) {
+			return cb(null, true);
+		}
+		return cb(new ApiError(400, 'Bad Request', ["Only mp4, mkv or webm files are allowed for videos!"]));
 	} else {
-		cb(new ApiError(400, 'Bad Request', ["Only jpeg, png, jpg or webp files are allowed!"]))
+		const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+		if (allowedTypes.includes(file.mimetype)) {
+			return cb(null, true);
+		}
+		return cb(new ApiError(400, 'Bad Request', ["Only jpeg, png, jpg or webp files are allowed for thumbnails!"]));
 	}
-}
+};
 
-// ✅ Video filter
-const videoFilter = (req, file, cb) => {
-	const allowedTypes = ["video/mp4", "video/mkv", "video/webm"]
-	if (allowedTypes.includes(file.mimetype)) {
-		cb(null, true)
-	} else {
-		cb(new ApiError(400, 'Bad Request', ["Only mp4, mkv or webm video files are allowed!"]))
-	}
-}
 
-// ✅ Instances using common storage
-export const uploadPhotos = multer({
+export const upload = multer({
 	storage,
-	fileFilter: photoFilter,
-	limits: { fileSize: 5 * 1024 * 1024 } // 5MB
-})
-
-export const uploadVideos = multer({
-	storage,
-	fileFilter: videoFilter,
+	fileFilter,
 	limits: { fileSize: 100 * 1024 * 1024 } // 100MB
 })

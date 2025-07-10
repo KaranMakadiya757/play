@@ -1,43 +1,60 @@
 import { Router } from 'express';
+import { verifyJWT } from "../middlewares/auth.middleware.js"
+import { upload } from "../middlewares/multer.middleware.js"
+import validate from '../middlewares/validation.middleware.js';
+import { videoValidationSchema } from '../Validations/video.validator.js';
+import videoownerHandler from '../middlewares/Ownership/videoowner.middleware.js';
 import {
     deleteVideo,
     getAllVideos,
     getVideoById,
-    publishAVideo,
+    uploadVideo,
     togglePublishStatus,
     updateVideo,
 } from "../controllers/video.controller.js"
-import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { uploadVideos } from "../middlewares/multer.middleware.js"
 
+
+// Router Instance
 const router = Router();
 
+// Secured Routes
 router.use(verifyJWT);
 
-router
-    .route("/")
-    .get(getAllVideos)
-    .post(
-        uploadVideos.fields([
-            {
-                name: "videoFile",
-                maxCount: 1,
-            },
-            {
-                name: "thumbnail",
-                maxCount: 1,
-            },
+// Get All Videos
+router.route("/").get(getAllVideos)
 
-        ]),
-        publishAVideo
-    );
+// Upload a Video
+router.route("/").post(
+    upload.fields([
+        {
+            name: "video",
+            maxCount: 1
+        },
+        {
+            name: "thumbnail",
+            maxCount: 1
+        }
+    ]),
+    validate(videoValidationSchema),
+    uploadVideo
+);
 
-router
-    .route("/:videoId")
-    .get(getVideoById)
-    .delete(deleteVideo)
-    .patch(uploadVideos.single("thumbnail"), updateVideo);
+// Get Video By ID
+router.route("/:videoId").get(videoownerHandler, getVideoById);
 
-router.route("/toggle/publish/:videoId").patch(togglePublishStatus);
+// Update Video By ID
+router.route("/:videoId").patch(
+    videoownerHandler,
+    upload.single("thumbnail"),
+    validate(videoValidationSchema),
+    updateVideo
+);
+
+// Toggle Publish
+router.route("/toggle/publish/:videoId").patch(videoownerHandler, togglePublishStatus);
+
+// Delete Video By ID
+router.route("/:videoId").delete(videoownerHandler, deleteVideo);
+
 
 export default router
