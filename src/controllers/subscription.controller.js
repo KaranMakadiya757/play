@@ -1,69 +1,55 @@
-import mongoose, { isValidObjectId } from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { Subscription } from "../models/subscription.model.js"
 
+// Toggle Channel Subscription
 const toggleSubscription = asyncHandler(async (req, res) => {
-    // validate the object id
-    // find the channel and toggle subscription
-    // throw error if channel not found 
-    // return respone
 
-    const { channelId } = req.params
-
-    if (!isValidObjectId(channelId)) throw new ApiError(400, "Invalid Channel ID")
-
-
-
+    // Create a subscriber object
     const subobj = {
         subscriber: req.user._id,
-        channel: channelId
+        channel: req.channelId
     }
 
-    const subscription = await Subscription.findOne(subobj)
+    // Check Wheather the subscription is added or not
+    const subscription = await Subscription.findOne(subobj);
 
-
-
+    // Toggle the subscription
     if (!subscription) {
-        const newSubscriber = await Subscription.create(subobj)
+        // Add subscription
+        const newSubscriber = await Subscription.create(subobj);
 
-        if (!newSubscriber) throw new ApiError(500, "Something went wrong while adding subscription")
+        // Throw error 
+        if (!newSubscriber) throw new ApiError(500, "Something went wrong while adding subscription");
 
-
-
+        // Return response
         return res
             .status(201)
             .json(new ApiResponse(200, {}, "Subscription added"))
 
-    }
-    else {
-        const removedSubscription = await Subscription.deleteOne(subobj)
+    } else {
+        // remove the subscription
+        const removedSubscription = await Subscription.deleteOne(subobj);
 
-        if (!removedSubscription) throw new ApiError(500, "Something went wrong while removing subscription")
+        // Throw Error
+        if (!removedSubscription) throw new ApiError(500, "Something went wrong while removing subscription");
 
-
-
+        // Return Response
         return res
             .status(201)
-            .json(new ApiResponse(200, {}, "Subscription removed"))
+            .json(new ApiResponse(200, {}, "Subscription removed"));
     }
 
 })
 
+// Get Subscribers List
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 
-    const { channelId } = req.params
-
-    if (!isValidObjectId(channelId)) throw new ApiError(400, "Invalid Channel ID")
-
-
-
+    // Fetch the subscriber list with user 
     const subscriberList = await Subscription.aggregate([
         {
-            $match: {
-                channel: new mongoose.Types.ObjectId(channelId)
-            }
+            $match: { channel: req.channelId }
         },
         {
             $lookup: {
@@ -82,30 +68,38 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
                     }
                 ]
             }
+        },
+        {
+            $addFields: {
+                subscriber: { $first: "$subscriber" },
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                subscriber: 1
+            }
         }
     ])
 
+    // Throw Error
     if (!subscriberList) throw new ApiError(500, "something went wrong while fetching the subscriber list")
 
-
-
+    // Return response
     return res
         .status(200)
         .json(new ApiResponse(200, subscriberList, "Subscriber list fetched sucessfully"))
 
 })
 
+// Get Subscribed Channel List
 const getSubscribedChannels = asyncHandler(async (req, res) => {
-    const { subscriberId } = req.params
 
-    if (!isValidObjectId(subscriberId)) throw new ApiError(400, "Invalid Subscriber ID")
-
-
-
+    // Fetch the subscribed Channel list with Channel info
     const subscribedChannelList = await Subscription.aggregate([
         {
             $match: {
-                subscriber: new mongoose.Types.ObjectId(subscriberId)
+                subscriber: req.subscriberId
             }
         },
         {
@@ -125,16 +119,27 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
                     }
                 ]
             }
+        },
+        {
+            $addFields: {
+                channel: { $first: "$channel" },
+            }
+        },
+        {
+            $project: {
+                _id: 1,
+                channel: 1
+            }
         }
-    ])
+    ]);
 
-    if (!subscribedChannelList) throw new ApiError(500, "something went wrong while fetching the subscribed channel list")
+    // Throw Error
+    if (!subscribedChannelList) throw new ApiError(500, "something went wrong while fetching the subscribed channel list");
 
-
-
+    // Return response
     return res
         .status(200)
-        .json(new ApiResponse(200, subscribedChannelList, "subscribed channel list fetched sucessfully"))
+        .json(new ApiResponse(200, subscribedChannelList, "subscribed channel list fetched sucessfully"));
 })
 
 export {
