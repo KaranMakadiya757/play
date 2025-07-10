@@ -249,6 +249,9 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     const avatarLocalPath = req.files?.avatar?.[0]?.path;
     const coverImageLocalPath = req.files?.coverimage?.[0]?.path;
 
+    // Throw error if Avatar is not Provided
+    if (!avatarLocalPath && !req.body.avatar) throw new ApiError(400, "Bad Request", ["Avatar is required"]);
+
     // if avatar is provided upload it to coludinary 
     if (avatarLocalPath) {
 

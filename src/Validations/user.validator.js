@@ -59,13 +59,14 @@ const userUpdateValidationSchema = Joi.object({
     username: Joi.string()
         .trim()
         .lowercase()
-        .optional()
+        .required()
         .min(3)
         .max(10)
         .pattern(/^[a-zA-Z0-9_]+$/)
         .messages({
             'string.base': 'Username must be a string',
             'string.empty': 'Username is required',
+            'any.required': 'Username is required',
             'string.min': 'Username must be at least 3 characters long',
             'string.max': 'Username must not exceed 10 characters',
             'string.pattern.base': 'Only alphanumeric characters and underscore are allowed'
@@ -75,24 +76,38 @@ const userUpdateValidationSchema = Joi.object({
         .trim()
         .lowercase()
         .email()
-        .optional()
+        .required()
         .messages({
             'string.base': 'Email must be a string',
             'string.empty': 'Email is required',
-            'string.email': 'Email must be a valid email address'
+            'string.email': 'Email must be a valid email address',
+            'any.required': 'Email is required'
         }),
 
     fullname: Joi.string()
         .trim()
-        .optional()
+        .required()
         .min(3)
         .max(20)
         .messages({
             'string.base': 'Full name must be a string',
             'string.empty': 'Full name is required',
             'string.min': 'Full name must be at least 3 characters long',
-            'string.max': 'Full name must not exceed 20 characters'
-        })
+            'string.max': 'Full name must not exceed 20 characters',
+            'any.required': 'Full name is required'
+        }),
+
+    avatar: Joi.string()
+        .trim()
+        .optional()
+        .messages({
+            'string.empty': 'Avatar Can not be Empty'
+        }),
+
+    coverimage: Joi.string()
+        .trim()
+        .optional()
+        .allow("")
 });
 
 const userLoginValidationSchema = Joi.object({
