@@ -1,4 +1,9 @@
-import { Router } from 'express'
+import { Router } from "express"
+import { verifyJWT } from "../middlewares/auth.middleware.js"
+import validate from "../middlewares/validation.middleware.js"
+import playlistHandler from "../middlewares/playlist.middleware.js"
+import { playlistValidationSchema } from "../Validations/playlist.validator.js"
+
 import {
     addVideoToPlaylist,
     createPlaylist,
@@ -6,25 +11,34 @@ import {
     getPlaylistById,
     getUserPlaylists,
     removeVideoFromPlaylist,
-    updatePlaylist,
+    updatePlaylist
 } from "../controllers/playlist.controller.js"
-import { verifyJWT } from "../middlewares/auth.middleware.js"
 
+// Router Instance
 const router = Router()
 
+// Secure Routes
 router.use(verifyJWT)
 
-router.route("/").post(createPlaylist) 
+// Create Playlist
+router.route("/").post(validate(playlistValidationSchema), createPlaylist)
 
-router
-    .route("/:playlistId")
-    .get(getPlaylistById)
-    .patch(updatePlaylist)
-    .delete(deletePlaylist)
+// Get All Playlists for the User
+router.route("/user/:userId").get(playlistHandler, getUserPlaylists)
 
-router.route("/add/:videoId/:playlistId").patch(addVideoToPlaylist)
-router.route("/remove/:videoId/:playlistId").patch(removeVideoFromPlaylist)
+// Get Playlist by ID
+router.route("/:playlistId").get(playlistHandler, getPlaylistById)
 
-router.route("/user/:userId").get(getUserPlaylists)
+// Update Playlist
+router.route("/:playlistId").patch(validate(playlistValidationSchema), playlistHandler, updatePlaylist)
+
+// Add video to playlist
+router.route("/add/:videoId/:playlistId").patch(playlistHandler, addVideoToPlaylist)
+
+// Remove video from playlist
+router.route("/remove/:videoId/:playlistId").patch(playlistHandler, removeVideoFromPlaylist)
+
+// Delete Playlist
+router.route("/:playlistId").delete(playlistHandler, deletePlaylist)
 
 export default router
