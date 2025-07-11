@@ -1,5 +1,6 @@
 import { Schema, model } from "mongoose";
 import aggregatePaginate from "mongoose-aggregate-paginate-v2";
+import { deleteFromCloudinary } from "../utils/fileOperation.js";
 
 const videoSchema = new Schema(
     {
@@ -38,6 +39,19 @@ const videoSchema = new Schema(
     },
     { timestamps: true }
 )
+
+
+videoSchema.pre("findOneAndDelete", async function (next) {
+    const doc = await this.model.findOne(this.getFilter());
+
+    if (doc) {
+        await deleteFromCloudinary(doc.video, "video");
+        await deleteFromCloudinary(doc.thumbnail);
+    }
+
+    next();
+});
+
 
 videoSchema.plugin(aggregatePaginate)
 

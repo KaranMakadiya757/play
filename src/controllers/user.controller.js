@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { User } from "../models/user.model.js"
-import { uploadOnCloudinary } from "../utils/fileUpload.js"
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/fileOperation.js"
 import { cookieOption } from "../constants.js";
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
@@ -39,11 +39,11 @@ const registerUser = asyncHandler(async (req, res) => {
     if (!avatarLocalPath) throw new ApiError(400, "Bad Request", ["Avatar is required"]);
 
     // UPLOAD THE AVATAR AND COVER IMAGES ON CLOUDINARY AND STORE THE RESPONSE IN VARIABLE AND THROW ERROR IF NO IAMGES EXISTS
-    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    const avatar = await uploadOnCloudinary(avatarLocalPath, "Profile");
 
     // if avatar is uploaded then save the url in req body otherwise throw error
     if (avatar) {
-        req.body.avatar = avatar?.url;
+        req.body.avatar = avatar?.public_id;
     } else {
         throw new ApiError(500, "Something went wrong while uploading Avatar");
     }
@@ -56,10 +56,10 @@ const registerUser = asyncHandler(async (req, res) => {
     // if cover image is provided upload it to coludinary 
     if (coverImageLocalPath) {
 
-        const coverimage = await uploadOnCloudinary(coverImageLocalPath);
+        const coverimage = await uploadOnCloudinary(coverImageLocalPath, "Profile");
 
         if (coverimage) {
-            req.body.coverimage = coverimage?.url;
+            req.body.coverimage = coverimage?.public_id;
         } else {
             throw new ApiError(500, "Something went wrong while uploading the cover image");
         }
@@ -255,10 +255,11 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     // if avatar is provided upload it to coludinary 
     if (avatarLocalPath) {
 
-        const avatar = await uploadOnCloudinary(avatarLocalPath);
+        const avatar = await uploadOnCloudinary(avatarLocalPath, "Profile");
 
         if (avatar) {
-            req.body.avatar = avatar?.url;
+            req.body.avatar = avatar?.public_id;
+            await deleteFromCloudinary(req.user.avatar)
         } else {
             throw new ApiError(500, "Something went wrong while uploading the cover image");
         }
@@ -267,13 +268,19 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     // if cover image is provided upload it to coludinary 
     if (coverImageLocalPath) {
 
-        const coverimage = await uploadOnCloudinary(coverImageLocalPath);
+        const coverimage = await uploadOnCloudinary(coverImageLocalPath, "Profile");
 
         if (coverimage) {
-            req.body.coverimage = coverimage?.url;
+            req.body.coverimage = coverimage?.public_id;
+            await deleteFromCloudinary(req.user.coverimage)
         } else {
             throw new ApiError(500, "Something went wrong while uploading the cover image");
         }
+    }
+
+    // Delete cover image if no cover image is provided
+    if ((req.body.coverimage)?.trim() === "") {
+        await deleteFromCloudinary(req.user.coverimage)
     }
 
 

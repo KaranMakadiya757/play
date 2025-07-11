@@ -2,7 +2,7 @@ import { Video } from "../models/video.model.js"
 import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
-import { uploadOnCloudinary } from "../utils/fileUpload.js"
+import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/fileOperation.js"
 
 // ADD LIKE COUNT IN GET VIDEOS BY ID
 const getAllVideos = asyncHandler(async (req, res) => {
@@ -91,12 +91,12 @@ const uploadVideo = asyncHandler(async (req, res) => {
     }
 
     // Upload video and thumbnail to coludinary
-    const video = await uploadOnCloudinary(videoLocalPath);
-    const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+    const video = await uploadOnCloudinary(videoLocalPath, req.user._id);
+    const thumbnail = await uploadOnCloudinary(thumbnailLocalPath, req.user._id);
 
     // Set video url and duration if video is successfully uploaded else throw error
     if (video) {
-        req.body.video = video?.url;
+        req.body.video = video?.public_id;
         req.body.duration = Math.floor(video?.duration ?? 0);
     } else {
         throw new ApiError(500, "Something went wrong while uploading video !!!")
@@ -104,7 +104,7 @@ const uploadVideo = asyncHandler(async (req, res) => {
 
     // Set thumbnail url if thumbnail is successfully uploaded else throw error
     if (thumbnail) {
-        req.body.thumbnail = thumbnail?.url;
+        req.body.thumbnail = thumbnail?.public_id;
     } else {
         throw new ApiError(500, "Something went wrong while uploading Thumbnail !!!")
     }
@@ -183,8 +183,14 @@ const updateVideo = asyncHandler(async (req, res) => {
 
     // Upload thumbnail to coludinary
     if (thumbnailLocalPath) {
-        const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
-        req.body.thumbnail = thumbnail?.url;
+        const thumbnail = await uploadOnCloudinary(thumbnailLocalPath, req.user._id);
+
+        if (thumbnail) {
+            req.body.thumbnail = thumbnail?.public_id;
+            await deleteFromCloudinary(req.video.thumbnail)
+        } else {
+            throw new ApiError(500, "Something Went wring while uplaoding image")
+        }
     }
 
     // Update the video
