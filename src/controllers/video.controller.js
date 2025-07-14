@@ -28,7 +28,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
     const aggregateVideos = Video.aggregate([
         {
             $match: {
-                owner: req.user._id,
                 isPublished: true,
                 title: { $regex: query, $options: 'i' }
             }
