@@ -50,6 +50,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
 })
 
+// Add comment
 const addComment = asyncHandler(async (req, res) => {
 
     // Set Video id in request body
@@ -70,10 +71,9 @@ const addComment = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(new ApiResponse(200, createdComment, "Comment added successfully"));
-
-
 })
 
+// Update Comment
 const updateComment = asyncHandler(async (req, res) => {
 
     // Find the Comment by ID and Update
@@ -94,6 +94,7 @@ const updateComment = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, updatedComment, "Comment updated successfully"));
 })
 
+// Delete Comment
 const deleteComment = asyncHandler(async (req, res) => {
 
     // Delete Comment

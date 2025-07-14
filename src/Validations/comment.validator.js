@@ -9,7 +9,7 @@ const commentValidationSchema = Joi.object({
             'string.base': 'Comment content must be a string.',
             'string.empty': 'Comment content is required.',
             'string.min': 'Comment content must be at least 3 characters long.',
-            'string.max': 'Comment content must not exceed 50 characters.',
+            'string.max': 'Comment content must not exceed 200 characters.',
             'any.required': 'Comment content is required.'
         })
 });

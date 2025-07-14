@@ -5,11 +5,12 @@ import { Playlist } from "../models/playlist.model.js";
 import { Video } from "../models/video.model.js";
 import { User } from "../models/user.model.js";
 import { Comment } from "../models/comment.model.js";
+import { Tweet } from "../models/tweet.model.js";
 
 const verifyId = asyncHandler(
     async function (req, res, next) {
 
-        const { playlistId, videoId, channelId, commentId } = req.params;
+        const { playlistId, videoId, channelId, commentId, tweetId } = req.params;
 
         // Validate Video Id if provided
         if (videoId) {
@@ -69,8 +70,8 @@ const verifyId = asyncHandler(
             req.channel = channel;
         }
 
-         // Validate Comment Id if provided
-         if (commentId) {
+        // Validate Comment Id if provided
+        if (commentId) {
             if (!isValidObjectId(commentId)) throw new ApiError(400, "Invalid Comment ID");
 
             // find the comment from DB
@@ -88,6 +89,27 @@ const verifyId = asyncHandler(
 
             // set comment in the req
             req.comment = comment;
+        }
+
+        // Validate Tweet Id if provided
+        if (tweetId) {
+            if (!isValidObjectId(tweetId)) throw new ApiError(400, "Invalid Tweet ID");
+
+            // find the tweet from DB
+            const tweet = await Tweet.findById(new mongoose.Types.ObjectId(tweetId));
+
+            // throw error if tweet is not found
+            if (!tweet) {
+                throw new ApiError(404, "Tweet Not Found !!");
+            }
+
+            // check the ownership
+            if (tweet.owner?.toString() !== req.user._id?.toString()) {
+                throw new ApiError(403, "You Don't have access to this Tweet !!!");
+            }
+
+            // set tweet in the req
+            req.tweet = tweet;
         }
 
         // move to next 

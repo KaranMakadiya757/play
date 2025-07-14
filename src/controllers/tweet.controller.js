@@ -1,24 +1,85 @@
-import mongoose, { isValidObjectId } from "mongoose"
 import { Tweet } from "../models/tweet.model.js"
-import { User } from "../models/user.model.js"
 import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 
-const createTweet = asyncHandler(async (req, res) => {
-    //TODO: create tweet
-})
-
+// Get all user tweets
 const getUserTweets = asyncHandler(async (req, res) => {
-    // TODO: get user tweets
+
+    // create aggreagation pipeline for comments
+    const tweets = await Tweet.aggregate([
+        {
+            $match: {
+                owner: req.user._id
+            }
+        }
+    ]);
+
+    // Throw error if comments are not found
+    if (!tweets) throw new ApiError(500, "Internal server error");
+
+    // return response
+    return res
+        .status(200)
+        .json(new ApiResponse(200, tweets, "Tweets fetched sucessfully"));
 })
 
+// Create Tweet
+const createTweet = asyncHandler(async (req, res) => {
+
+    // Set owner id in request body
+    req.body.owner = req.user._id
+
+    // Create tweet 
+    const createdTweet = await Tweet.create(req.body);
+
+    // Throw Error is comment is not created
+    if (!createdTweet) {
+        throw new ApiError(500, "Internal Server Error !!!");
+    }
+
+    // Return response  
+    return res
+        .status(200)
+        .json(new ApiResponse(200, createdTweet, "Tweet added successfully"));
+})
+
+// Update Tweet
 const updateTweet = asyncHandler(async (req, res) => {
-    //TODO: update tweet
+
+    // Find the Tweet by ID and Update
+    const updatedTweet = await Tweet.findByIdAndUpdate(
+        req.tweet._id,
+        req.body,
+        { new: true }
+    );
+
+    // Throw error is something goes wrong while updating tweet
+    if (!updatedTweet) {
+        throw new ApiError(500, "Internal Server Error !!!");
+    }
+
+    // Return Response
+    return res
+        .status(200)
+        .json(new ApiResponse(200, updatedTweet, "Tweet updated successfully"));
 })
 
+// Delete Tweet
 const deleteTweet = asyncHandler(async (req, res) => {
-    //TODO: delete tweet
+
+    // Delete Comment
+    const deletedTweet = await Tweet.findByIdAndDelete(req.tweet._id)
+
+    // Throw error is something goes wrong while deleting comment
+    if (!deletedTweet) {
+        throw new ApiError(500, "Internal Server Error !!!");
+    }
+
+    // Return response
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "Tweet deleted successfully"));
 })
 
 export {
