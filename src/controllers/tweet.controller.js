@@ -47,6 +47,11 @@ const createTweet = asyncHandler(async (req, res) => {
 // Update Tweet
 const updateTweet = asyncHandler(async (req, res) => {
 
+    // check the ownership
+    if (req.tweet.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Tweet !!!");
+    }
+
     // Find the Tweet by ID and Update
     const updatedTweet = await Tweet.findByIdAndUpdate(
         req.tweet._id,
@@ -67,6 +72,11 @@ const updateTweet = asyncHandler(async (req, res) => {
 
 // Delete Tweet
 const deleteTweet = asyncHandler(async (req, res) => {
+
+    // check the ownership
+    if (req.tweet.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Tweet !!!");
+    }
 
     // Delete Comment
     const deletedTweet = await Tweet.findByIdAndDelete(req.tweet._id)

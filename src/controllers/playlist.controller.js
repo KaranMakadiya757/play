@@ -47,6 +47,11 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
 // Get Playlist By ID
 const getPlaylistById = asyncHandler(async (req, res) => {
 
+    // check the ownership
+    if (req.playlist.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Resource !!!");
+    }
+
     // Fetch Playlist by merging videos
     const fetchedplaylist = await Playlist.aggregate([
         {
@@ -87,6 +92,11 @@ const getPlaylistById = asyncHandler(async (req, res) => {
 // Update Playlist
 const updatePlaylist = asyncHandler(async (req, res) => {
 
+    // check the ownership
+    if (req.playlist.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Resource !!!");
+    }
+
     // Update the Playlist by id
     const updatedplaylist = await Playlist.findByIdAndUpdate(
         req.playlist._id,
@@ -106,6 +116,11 @@ const updatePlaylist = asyncHandler(async (req, res) => {
 
 // Add Video to the Playlist
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
+
+    // check the ownership
+    if (req.playlist.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Resource !!!");
+    }
 
     // Check if Video already exists in the playlist
     if (req.playlist.videos.includes(req.video._id)) throw new ApiError(400, "Video is already present in the playlist");
@@ -132,6 +147,11 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
 // Remove video From the playlist
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
 
+    // check the ownership
+    if (req.playlist.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Resource !!!");
+    }
+
     // Check if Video exists in the playlist
     if (!req.playlist.videos.includes(req.video._id)) throw new ApiError(400, "Video you want to remove does not exist in the playlist");
 
@@ -156,6 +176,11 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
 
 // Delete PLaylist
 const deletePlaylist = asyncHandler(async (req, res) => {
+
+    // check the ownership
+    if (req.playlist.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Resource !!!");
+    }
 
     // FInd the playlist by ID and delete it
     const deletedPlaylist = await Playlist.findByIdAndDelete(req.playlist._id);

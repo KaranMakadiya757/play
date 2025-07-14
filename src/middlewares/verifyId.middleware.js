@@ -23,12 +23,7 @@ const verifyId = asyncHandler(
             if (!video) {
                 throw new ApiError(404, "Video Not Found !!");
             }
-
-            // check the ownership
-            if (video.owner?.toString() !== req.user._id?.toString()) {
-                throw new ApiError(403, "You Don't have access to this Video !!!");
-            }
-
+        
             // set video in the req
             req.video = video;
         }
@@ -43,11 +38,6 @@ const verifyId = asyncHandler(
             // throw error if video is not found
             if (!playlist) {
                 throw new ApiError(404, "Playlist Not Found !!");
-            }
-
-            // check the ownership
-            if (playlist.owner?.toString() !== req.user._id?.toString()) {
-                throw new ApiError(403, "You Don't have access to this Resource !!!");
             }
 
             // set video in the req
@@ -82,11 +72,6 @@ const verifyId = asyncHandler(
                 throw new ApiError(404, "Comment Not Found !!");
             }
 
-            // check the ownership
-            if (comment.owner?.toString() !== req.user._id?.toString()) {
-                throw new ApiError(403, "You Don't have access to this Comment !!!");
-            }
-
             // set comment in the req
             req.comment = comment;
         }
@@ -101,11 +86,6 @@ const verifyId = asyncHandler(
             // throw error if tweet is not found
             if (!tweet) {
                 throw new ApiError(404, "Tweet Not Found !!");
-            }
-
-            // check the ownership
-            if (tweet.owner?.toString() !== req.user._id?.toString()) {
-                throw new ApiError(403, "You Don't have access to this Tweet !!!");
             }
 
             // set tweet in the req

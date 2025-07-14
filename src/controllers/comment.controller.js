@@ -76,6 +76,11 @@ const addComment = asyncHandler(async (req, res) => {
 // Update Comment
 const updateComment = asyncHandler(async (req, res) => {
 
+    // check the ownership
+    if (req.comment.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Comment !!!");
+    }
+
     // Find the Comment by ID and Update
     const updatedComment = await Comment.findByIdAndUpdate(
         req.comment._id,
@@ -97,6 +102,11 @@ const updateComment = asyncHandler(async (req, res) => {
 // Delete Comment
 const deleteComment = asyncHandler(async (req, res) => {
 
+    // check the ownership
+    if (req.comment.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Comment !!!");
+    }
+    
     // Delete Comment
     const deletedComment = await Comment.findByIdAndDelete(req.comment._id)
 

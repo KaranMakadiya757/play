@@ -172,6 +172,11 @@ const getVideoById = asyncHandler(async (req, res) => {
 // Update Video
 const updateVideo = asyncHandler(async (req, res) => {
 
+    // check the ownership
+    if (req.video.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Video !!!");
+    }
+
     // Thumbnail Local Path
     const thumbnailLocalPath = req.file?.path;
 
@@ -212,6 +217,11 @@ const updateVideo = asyncHandler(async (req, res) => {
 // Toggle Publish Status
 const togglePublishStatus = asyncHandler(async (req, res) => {
 
+    // check the ownership
+    if (req.video.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Video !!!");
+    }
+
     // Toggle video Status
     const updatedvideo = await Video.findByIdAndUpdate(
         req.video._id,
@@ -235,6 +245,11 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
 // Delete Video
 const deleteVideo = asyncHandler(async (req, res) => {
+
+    // check the ownership
+    if (req.video.owner?.toString() !== req.user._id?.toString()) {
+        throw new ApiError(403, "You Don't have access to this Video !!!");
+    }
 
     // Delete the video from db
     const deletedvideo = await Video.findByIdAndDelete(req.video._id);
