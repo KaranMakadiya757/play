@@ -4,21 +4,19 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { Playlist } from "../models/playlist.model.js";
 import { Video } from "../models/video.model.js";
 import { User } from "../models/user.model.js";
+import { Comment } from "../models/comment.model.js";
 
 const verifyId = asyncHandler(
     async function (req, res, next) {
 
-        const { playlistId, videoId, channelId } = req.params;
+        const { playlistId, videoId, channelId, commentId } = req.params;
 
         // Validate Video Id if provided
         if (videoId) {
             if (!isValidObjectId(videoId)) throw new ApiError(400, "Invalid Video ID");
 
-            // set channel Id in the req
-            req.videoId = new mongoose.Types.ObjectId(videoId);
-
             // find the video from DB
-            const video = await Video.findById(req.videoId);
+            const video = await Video.findById(new mongoose.Types.ObjectId(videoId));
 
             // throw error if video is not found
             if (!video) {
@@ -69,6 +67,27 @@ const verifyId = asyncHandler(
 
             // set channel in the req
             req.channel = channel;
+        }
+
+         // Validate Comment Id if provided
+         if (commentId) {
+            if (!isValidObjectId(commentId)) throw new ApiError(400, "Invalid Comment ID");
+
+            // find the comment from DB
+            const comment = await Comment.findById(new mongoose.Types.ObjectId(commentId));
+
+            // throw error if comment is not found
+            if (!comment) {
+                throw new ApiError(404, "Comment Not Found !!");
+            }
+
+            // check the ownership
+            if (comment.owner?.toString() !== req.user._id?.toString()) {
+                throw new ApiError(403, "You Don't have access to this Comment !!!");
+            }
+
+            // set comment in the req
+            req.comment = comment;
         }
 
         // move to next 
