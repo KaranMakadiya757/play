@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { verifyJWT } from "../middlewares/auth.middleware.js"
-import { upload } from "../middlewares/multer.middleware.js"
+import verifyId from '../middlewares/verifyId.middleware.js';
+import { upload } from "../middlewares/multer.middleware.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 import validate from '../middlewares/validation.middleware.js';
 import { videoValidationSchema } from '../Validations/video.validator.js';
-import videoHandler from '../middlewares/video.middleware.js';
 import {
     deleteVideo,
     getAllVideos,
@@ -40,21 +40,21 @@ router.route("/").post(
 );
 
 // Get Video By ID
-router.route("/:videoId").get(videoHandler, getVideoById);
+router.route("/:videoId").get(verifyId, getVideoById);
 
 // Update Video By ID
 router.route("/:videoId").patch(
-    videoHandler,
+    verifyId,
     upload.single("thumbnail"),
     validate(videoValidationSchema),
     updateVideo
 );
 
 // Toggle Publish
-router.route("/toggle/publish/:videoId").patch(videoHandler, togglePublishStatus);
+router.route("/toggle/publish/:videoId").patch(verifyId, togglePublishStatus);
 
 // Delete Video By ID
-router.route("/:videoId").delete(videoHandler, deleteVideo);
+router.route("/:videoId").delete(verifyId, deleteVideo);
 
 
 export default router

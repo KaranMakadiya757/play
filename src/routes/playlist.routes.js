@@ -1,7 +1,7 @@
 import { Router } from "express"
+import verifyId from "../middlewares/verifyId.middleware.js"
 import { verifyJWT } from "../middlewares/auth.middleware.js"
 import validate from "../middlewares/validation.middleware.js"
-import playlistHandler from "../middlewares/playlist.middleware.js"
 import { playlistValidationSchema } from "../Validations/playlist.validator.js"
 
 import {
@@ -24,21 +24,21 @@ router.use(verifyJWT)
 router.route("/").post(validate(playlistValidationSchema), createPlaylist)
 
 // Get All Playlists for the User
-router.route("/user/:userId").get(playlistHandler, getUserPlaylists)
+router.route("/my-playlists").get(getUserPlaylists)
 
 // Get Playlist by ID
-router.route("/:playlistId").get(playlistHandler, getPlaylistById)
+router.route("/:playlistId").get(verifyId, getPlaylistById)
 
 // Update Playlist
-router.route("/:playlistId").patch(validate(playlistValidationSchema), playlistHandler, updatePlaylist)
+router.route("/:playlistId").patch(validate(playlistValidationSchema), verifyId, updatePlaylist)
 
 // Add video to playlist
-router.route("/add/:videoId/:playlistId").patch(playlistHandler, addVideoToPlaylist)
+router.route("/add/:videoId/:playlistId").patch(verifyId, addVideoToPlaylist)
 
 // Remove video from playlist
-router.route("/remove/:videoId/:playlistId").patch(playlistHandler, removeVideoFromPlaylist)
+router.route("/remove/:videoId/:playlistId").patch(verifyId, removeVideoFromPlaylist)
 
 // Delete Playlist
-router.route("/:playlistId").delete(playlistHandler, deletePlaylist)
+router.route("/:playlistId").delete(verifyId, deletePlaylist)
 
 export default router

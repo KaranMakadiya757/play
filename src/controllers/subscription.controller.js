@@ -49,7 +49,7 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     // Fetch the subscriber list with user 
     const subscriberList = await Subscription.aggregate([
         {
-            $match: { channel: req.channelId }
+            $match: { channel: req.user._id }
         },
         {
             $lookup: {
@@ -99,7 +99,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     const subscribedChannelList = await Subscription.aggregate([
         {
             $match: {
-                subscriber: req.subscriberId
+                subscriber: req.user._id
             }
         },
         {

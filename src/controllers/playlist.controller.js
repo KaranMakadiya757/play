@@ -29,7 +29,7 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
     const userplaylist = await Playlist.aggregate([
         {
             $match: {
-                owner: req.userparams._id
+                owner: req.user._id
             }
         }
     ])

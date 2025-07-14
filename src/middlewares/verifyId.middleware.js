@@ -5,29 +5,10 @@ import { Playlist } from "../models/playlist.model.js";
 import { Video } from "../models/video.model.js";
 import { User } from "../models/user.model.js";
 
-const playlistHandler = asyncHandler(
+const verifyId = asyncHandler(
     async function (req, res, next) {
 
-        const { playlistId, userId, videoId } = req.params;
-
-        // Validate User Id if provided
-        if (userId) {
-            if (!isValidObjectId(userId)) throw new ApiError(400, "Invalid User ID");
-
-            // set subscriber Id in the req
-            req.userId = new mongoose.Types.ObjectId(userId);
-
-            // find the user from DB
-            const user = await User.findById(req.userId);
-
-            // throw error if user is not found
-            if (!user) {
-                throw new ApiError(404, "User Not Found !!");
-            }
-
-            // set user in the req
-            req.userparams = user;
-        }
+        const { playlistId, videoId, channelId } = req.params;
 
         // Validate Video Id if provided
         if (videoId) {
@@ -74,10 +55,26 @@ const playlistHandler = asyncHandler(
             req.playlist = playlist;
         }
 
+        // Validate Channel Id if provided
+        if (channelId) {
+            if (!isValidObjectId(channelId)) throw new ApiError(400, "Invalid Channel ID");
+
+            // find the channel from DB
+            const channel = await User.findById(new mongoose.Types.ObjectId(channelId));
+
+            // throw error if channel is not found
+            if (!channel) {
+                throw new ApiError(404, "Channel Not Found !!");
+            }
+
+            // set channel in the req
+            req.channel = channel;
+        }
+
         // move to next 
         next();
 
     }
 )
 
-export default playlistHandler
+export default verifyId
