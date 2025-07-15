@@ -9,7 +9,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     // Create a subscriber object
     const subobj = {
         subscriber: req.user._id,
-        channel: req.channelId
+        channel: req.channel._id
     }
 
     // Check Wheather the subscription is added or not

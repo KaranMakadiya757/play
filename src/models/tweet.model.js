@@ -24,7 +24,7 @@ tweetSchema.pre("findOneAndDelete", async function (next) {
     next();
 });
 
-tweetSchema.post('deleteMany', async function () {
+tweetSchema.pre('deleteMany', async function () {
     const filter = this.getFilter();
 
     const deletedTweets = await this.model.find(filter).select('_id');

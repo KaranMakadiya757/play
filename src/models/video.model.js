@@ -64,7 +64,7 @@ videoSchema.pre("findOneAndDelete", async function (next) {
     next();
 });
 
-videoSchema.post('deleteMany', async function () {
+videoSchema.pre('deleteMany', async function () {
     const filter = this.getFilter();
 
     const deletedVideos = await this.model.find(filter).select('_id thumbnail video');

@@ -34,7 +34,7 @@ commentSchema.pre("findOneAndDelete", async function (next) {
     next();
 });
 
-commentSchema.post('deleteMany', async function () {
+commentSchema.pre('deleteMany', async function () {
     const filter = this.getFilter();
 
     const deletedComments = await this.model.find(filter).select('_id');
