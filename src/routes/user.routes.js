@@ -10,7 +10,8 @@ import {
     logoutUser,
     registerUser,
     updateAccountDetails,
-    refereshAccessToken
+    refereshAccessToken,
+    deleteUser
 } from "../controllers/user.controller.js";
 
 import {
@@ -68,5 +69,8 @@ userRouter.route("/changepassword").patch(validate(changepasswordValidationSchem
 
 // Logout
 userRouter.route("/logout").post(logoutUser)
+
+// Delete User By ID
+userRouter.route("/").delete(deleteUser);
 
 export default userRouter;

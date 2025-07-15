@@ -1,6 +1,13 @@
-import { Schema, model } from "mongoose";
-import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
+import jwt from "jsonwebtoken"
+import { Schema, model } from "mongoose";
+import { Video } from "./video.model.js"
+import { Comment } from "./comment.model.js"
+import { Playlist } from "./playlist.model.js"
+import { Subscription } from "./subscription.model.js"
+import { Tweet } from "./tweet.model.js"
+import { Like } from "./like.model.js"
+import { deleteFromCloudinary } from "../utils/fileOperation.js";
 
 const userSchema = new Schema(
     {
@@ -54,6 +61,23 @@ userSchema.pre("save", async function (next) {
 
     this.password = await bcrypt.hash(this.password, 10)
     next()
+})
+
+userSchema.pre("findOneAndDelete", async function (next) {
+    const user = await this.model.findOne(this.getQuery());
+
+    await deleteFromCloudinary(user.avatar);
+    user.coverimage && await deleteFromCloudinary(user.coverimage);
+
+    await Video.deleteMany({ owner: user._id });
+    await Comment.deleteMany({ owner: user._id });
+    await Tweet.deleteMany({ owner: user._id });
+    await Playlist.deleteMany({ owner: user._id });
+    await Like.deleteMany({ likedBy: user._id });
+    await Subscription.deleteMany({ subscriber: user._id });
+    await Subscription.deleteMany({ channel: user._id });
+
+    next();
 })
 
 userSchema.methods.isPasswordCorrect = async function (password) {

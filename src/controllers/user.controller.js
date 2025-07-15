@@ -426,6 +426,22 @@ const getWatchHistory = asyncHandler(async (req, res) => {
         ))
 })
 
+// Delete User
+const deleteUser = asyncHandler(async (req, res) => {
+
+    // Delete the user from db
+    const deletedUser = await User.findByIdAndDelete(req.user._id);
+
+    // Throw error if video is not found
+    if (!deletedUser) throw new ApiError(404, "User not found !!");
+
+    // return response
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "User deleted sucessfully !!"));
+
+})
+
 
 export {
     registerUser,
@@ -436,5 +452,6 @@ export {
     getCurrentUser,
     updateAccountDetails,
     getUserChannelProfile,
-    getWatchHistory
+    getWatchHistory,
+    deleteUser
 }

@@ -1,4 +1,7 @@
 import { Schema, model } from "mongoose";
+import { Playlist } from "./playlist.model.js"
+import { Comment } from "./comment.model.js"
+import { Like } from "./like.model.js"
 import aggregatePaginate from "mongoose-aggregate-paginate-v2";
 import { deleteFromCloudinary } from "../utils/fileOperation.js";
 
@@ -47,9 +50,39 @@ videoSchema.pre("findOneAndDelete", async function (next) {
     if (doc) {
         await deleteFromCloudinary(doc.video, "video");
         await deleteFromCloudinary(doc.thumbnail);
+
+        // Remove those videos from all playlists
+        await Playlist.updateMany(
+            { videos: { $in: [doc._id] } },
+            { $pull: { videos: { $in: [doc._id] } } }
+        );
+
+        await Comment.deleteMany({ video: doc._id });
+        await Like.deleteMany({ video: doc._id });
     }
 
     next();
+});
+
+videoSchema.post('deleteMany', async function () {
+    const filter = this.getFilter();
+
+    const deletedVideos = await this.model.find(filter).select('_id thumbnail video');
+
+    const videoIds = deletedVideos.map(v => v._id);
+
+    for (const video of deletedVideos) {
+        await deleteFromCloudinary(video.video, "video");
+        await deleteFromCloudinary(video.thumbnail);
+    }
+
+    await Playlist.updateMany(
+        { videos: { $in: videoIds } },
+        { $pull: { videos: { $in: videoIds } } }
+    );
+
+    await Comment.deleteMany({ video: { $in: videoIds } });
+    await Like.deleteMany({ video: { $in: videoIds } });
 });
 
 
