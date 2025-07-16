@@ -1,7 +1,8 @@
-import express from "express"
-import cors from "cors"
-import cookieparser from "cookie-parser"
-import errorHandler from "./middlewares/errorhandler.middleware.js"
+import cors from "cors";
+import express from "express";
+import cookieparser from "cookie-parser";
+import errorHandler from "./middlewares/errorhandler.middleware.js";
+import { swaggerUi, swaggerSpec } from "../swagger.js";
 
 // EXPRESS APP CREATION 
 const app = express()
@@ -16,6 +17,9 @@ app.use(express.json({ limit: "16kb" }))
 app.use(express.urlencoded({ limit: "16kb", extended: true }))
 app.use(express.static("public"))
 app.use(cookieparser())
+
+// Swagger Docs
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 
 // ROUTER IMPORT
