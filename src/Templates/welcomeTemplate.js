@@ -14,7 +14,7 @@ const welcomeTemplate = (userName) => {
           </p>
   
           <div style="text-align: center; margin: 30px 0;">
-            <a href="https://yourplaytube.app/login" style="background-color: #ff4d4f; color: #fff; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+            <a href="#" style="background-color: #ff4d4f; color: #fff; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-weight: bold;">
               🔓 Login to Play Tube
             </a>
           </div>
