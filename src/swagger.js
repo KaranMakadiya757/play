@@ -17,7 +17,7 @@ const options = {
       { name: 'Comment' },
       { name: 'Like' },
       { name: 'Subscription' },
-      { name: 'PLaylist' },
+      { name: 'Playlist' },
       { name: 'Tweet' }
     ],
     components: {
