@@ -18,7 +18,11 @@ const getAllVideos = asyncHandler(async (req, res) => {
     // Configure Pagination
     const option = {
         page,
-        limit
+        limit,
+        customLabels: {
+            docs: "videos",
+            totalDocs: 'totalVideos',
+        }
     }
 
     // Throw error if sorting field is not a valid field
@@ -50,8 +54,17 @@ const getAllVideos = asyncHandler(async (req, res) => {
             }
         },
         {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "video",
+                as: "likes"
+            }
+        },
+        {
             $addFields: {
                 owner: { $first: "$owner" },
+                likes: { $size: "$likes" }
             }
         },
         {
@@ -152,8 +165,17 @@ const getVideoById = asyncHandler(async (req, res) => {
             }
         },
         {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "video",
+                as: "likes"
+            }
+        },
+        {
             $addFields: {
                 owner: { $first: "$owner" },
+                likes: { $size: "$likes" }
             }
         },
     ])
