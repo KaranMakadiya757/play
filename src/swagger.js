@@ -11,7 +11,7 @@ const options = {
     },
     servers: [
       {
-        url: process.env.API_URL,
+        url: "https://api-playtube.onrender.com/api/v1",
         description: 'Version 1.0.0'
       }
     ]
