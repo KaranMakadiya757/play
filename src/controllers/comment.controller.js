@@ -28,9 +28,23 @@ const getVideoComments = asyncHandler(async (req, res) => {
             }
         },
         {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "comment",
+                as: "likes"
+            }
+        },
+        {
+            $addFields: {
+                likes: { $size: "$likes" }
+            }
+        },
+        {
             $project: {
                 _id: 1,
                 content: 1,
+                likes: 1,
                 createdAt: 1,
                 updatedAt: 1
             }
@@ -106,7 +120,7 @@ const deleteComment = asyncHandler(async (req, res) => {
     if (req.comment.owner?.toString() !== req.user._id?.toString()) {
         throw new ApiError(403, "You Don't have access to this Comment !!!");
     }
-    
+
     // Delete Comment
     const deletedComment = await Comment.findByIdAndDelete(req.comment._id)
 
