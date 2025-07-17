@@ -6,6 +6,8 @@ import { deleteFromCloudinary, uploadOnCloudinary } from "../utils/fileOperation
 import { cookieOption } from "../constants.js";
 import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
+import { sendEmail } from "../utils/sendmail.js";
+import { welcomeTemplate } from "../Templates/welcomeTemplate.js"
 
 // Register User
 const registerUser = asyncHandler(async (req, res) => {
@@ -74,6 +76,13 @@ const registerUser = asyncHandler(async (req, res) => {
 
     // throw error if user is not created
     if (!createduser) throw new ApiError(500, "Internal server error");
+
+    // Send welcome email
+    await sendEmail({
+        to: user.email,
+        subject: "Welcome to Task Manager!",
+        html: welcomeTemplate(user.fullname),
+    });
 
     // RETURN THE RESPONSE IF THERE ARE NO ERRORS 
     return res
