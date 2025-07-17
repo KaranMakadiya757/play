@@ -11,6 +11,22 @@ const verifyId = asyncHandler(
     async function (req, res, next) {
 
         const { playlistId, videoId, channelId, commentId, tweetId } = req.params;
+        const { videos } = req.body
+
+        // Validate videos array if provided
+        if (Array.isArray(videos) && videos.length > 0) {
+            // Check all are valid ObjectIds
+            const allValid = videos.every(id => isValidObjectId(id));
+            if (!allValid) {
+                throw new ApiError(400, "Bad request", ["One or more Video IDs in the videos array are invalid"]);
+            }
+
+            // Check all videos exist in DB with a single query
+            const foundVideos = await Video.find({ _id: { $in: videos } }, { _id: 1 });
+            if (foundVideos.length !== videos.length) {
+                throw new ApiError(404, "Bad request", ["One or more videos in the videos array do not exist"]);
+            }
+        }
 
         // Validate Video Id if provided
         if (videoId) {
