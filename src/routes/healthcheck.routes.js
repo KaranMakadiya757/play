@@ -10,6 +10,7 @@ const router = Router();
  *     summary: Health Check Route
  *     tags: 
  *      - Health Check   
+ *     security: []
  *     responses:
  *       200:
  *         description: Servers Are running

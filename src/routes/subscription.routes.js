@@ -13,7 +13,8 @@ const router = Router();
 // Secured Routes
 router.use(verifyJWT);
 
-/**
+/** Get Subscribers
+ * 
  * @swagger
  * /subscription/my-subscribers:
  *   get:
@@ -23,10 +24,10 @@ router.use(verifyJWT);
  *       200:
  *         description: List of subscribers fetched successfully
  */
-// Get Subscribers
 router.route("/my-subscribers").get(getUserChannelSubscribers)
 
-/**
+/** Get Subscribed Channels 
+ * 
  * @swagger
  * /subscription/my-subscriptions:
  *   get:
@@ -36,10 +37,10 @@ router.route("/my-subscribers").get(getUserChannelSubscribers)
  *       200:
  *         description: List of subscriptions fetched successfully
  */
-// Get Subscribed Channels 
 router.route("/my-subscriptions").get(getSubscribedChannels);
 
-/**
+/** Toggle Subscription
+ * 
  * @swagger
  * /subscription/c/{channelId}:
  *   post:
@@ -58,8 +59,6 @@ router.route("/my-subscriptions").get(getSubscribedChannels);
  *       404:
  *         description: Channel not found
  */
-// Toggle Subscription
 router.route("/c/:channelId").post(verifyId, toggleSubscription);
-
 
 export default router

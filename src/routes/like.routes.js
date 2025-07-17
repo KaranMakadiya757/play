@@ -15,7 +15,8 @@ const router = Router();
 // Secured Routes
 router.use(verifyJWT);
 
-/**
+/** Get all liked videos
+ * 
  * @swagger
  * /like/videos:
  *   get:
@@ -25,10 +26,10 @@ router.use(verifyJWT);
  *       200:
  *         description: List of liked videos fetched successfully
  */
-// Get all liked videos
 router.route("/videos").get(getLikedVideos);
 
-/**
+/** Toggle Video likes
+ * 
  * @swagger
  * /like/toggle/v/{videoId}:
  *   post:
@@ -47,10 +48,10 @@ router.route("/videos").get(getLikedVideos);
  *       404:
  *         description: Video not found
  */
-// Toggle Video likes
 router.route("/toggle/v/:videoId").post(verifyId, toggleVideoLike);
 
-/**
+/** Toggle Comment likes
+ * 
  * @swagger
  * /like/toggle/c/{commentId}:
  *   post:
@@ -69,10 +70,10 @@ router.route("/toggle/v/:videoId").post(verifyId, toggleVideoLike);
  *       404:
  *         description: Comment not found
  */
-// Toggle Comment likes
 router.route("/toggle/c/:commentId").post(verifyId, toggleCommentLike);
 
-/**
+/** Toggle Tweet likes
+ * 
  * @swagger
  * /like/toggle/t/{tweetId}:
  *   post:
@@ -91,7 +92,6 @@ router.route("/toggle/c/:commentId").post(verifyId, toggleCommentLike);
  *       404:
  *         description: Tweet not found
  */
-// Toggle Tweet likes
 router.route("/toggle/t/:tweetId").post(verifyId, toggleTweetLike);
 
 export default router

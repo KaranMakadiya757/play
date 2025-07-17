@@ -20,7 +20,43 @@ const router = Router()
 // Secure Routes
 router.use(verifyJWT)
 
-/**
+/** Get All Playlists for the User
+ * 
+ * @swagger
+ * /playlist/my-playlists:
+ *   get:
+ *     summary: Get all playlists for the user
+ *     tags: [Playlist]
+ *     responses:
+ *       200:
+ *         description: List of playlists fetched successfully
+ */
+router.route("/my-playlists").get(getUserPlaylists)
+
+/** Get Playlist by ID
+ * 
+ * @swagger
+ * /playlist/{playlistId}:
+ *   get:
+ *     summary: Get playlist by ID
+ *     tags: [Playlist]
+ *     parameters:
+ *       - in: path
+ *         name: playlistId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Playlist ID
+ *     responses:
+ *       200:
+ *         description: Playlist fetched successfully
+ *       404:
+ *         description: Playlist not found
+ */
+router.route("/:playlistId").get(verifyId, getPlaylistById)
+
+/** Create Playlist
+ * 
  * @swagger
  * /playlist:
  *   post:
@@ -45,45 +81,10 @@ router.use(verifyJWT)
  *       400:
  *         description: Bad request
  */
-// Create Playlist
 router.route("/").post(validate(playlistValidationSchema), createPlaylist)
 
-/**
- * @swagger
- * /playlist/my-playlists:
- *   get:
- *     summary: Get all playlists for the user
- *     tags: [Playlist]
- *     responses:
- *       200:
- *         description: List of playlists fetched successfully
- */
-// Get All Playlists for the User
-router.route("/my-playlists").get(getUserPlaylists)
-
-/**
- * @swagger
- * /playlist/{playlistId}:
- *   get:
- *     summary: Get playlist by ID
- *     tags: [Playlist]
- *     parameters:
- *       - in: path
- *         name: playlistId
- *         schema:
- *           type: string
- *         required: true
- *         description: Playlist ID
- *     responses:
- *       200:
- *         description: Playlist fetched successfully
- *       404:
- *         description: Playlist not found
- */
-// Get Playlist by ID
-router.route("/:playlistId").get(verifyId, getPlaylistById)
-
-/**
+/** Update Playlist
+ * 
  * @swagger
  * /playlist/{playlistId}:
  *   patch:
@@ -117,10 +118,10 @@ router.route("/:playlistId").get(verifyId, getPlaylistById)
  *       404:
  *         description: Playlist not found
  */
-// Update Playlist
 router.route("/:playlistId").patch(validate(playlistValidationSchema), verifyId, updatePlaylist)
 
-/**
+/** Add video to playlist
+ * 
  * @swagger
  * /playlist/add/{videoId}/{playlistId}:
  *   patch:
@@ -145,10 +146,10 @@ router.route("/:playlistId").patch(validate(playlistValidationSchema), verifyId,
  *       404:
  *         description: Playlist or video not found
  */
-// Add video to playlist
 router.route("/add/:videoId/:playlistId").patch(verifyId, addVideoToPlaylist)
 
-/**
+/** Remove video from playlist
+ * 
  * @swagger
  * /playlist/remove/{videoId}/{playlistId}:
  *   patch:
@@ -173,10 +174,10 @@ router.route("/add/:videoId/:playlistId").patch(verifyId, addVideoToPlaylist)
  *       404:
  *         description: Playlist or video not found
  */
-// Remove video from playlist
 router.route("/remove/:videoId/:playlistId").patch(verifyId, removeVideoFromPlaylist)
 
-/**
+/** Delete Playlist
+ * 
  * @swagger
  * /playlist/{playlistId}:
  *   delete:
@@ -195,7 +196,6 @@ router.route("/remove/:videoId/:playlistId").patch(verifyId, removeVideoFromPlay
  *       404:
  *         description: Playlist not found
  */
-// Delete Playlist
 router.route("/:playlistId").delete(verifyId, deletePlaylist)
 
 export default router

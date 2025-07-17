@@ -18,7 +18,8 @@ const router = Router();
 // Secured Routes
 router.use(verifyJWT);
 
-/**
+/** Get video Comments
+ * 
  * @swagger
  * /comment/{videoId}:
  *   get:
@@ -37,10 +38,10 @@ router.use(verifyJWT);
  *       404:
  *         description: Video not found
  */
-// Get video Comments
 router.route("/:videoId").get(verifyId, getVideoComments);
 
-/**
+/** Add Comment in video
+ * 
  * @swagger
  * /comment/{videoId}:
  *   post:
@@ -69,10 +70,10 @@ router.route("/:videoId").get(verifyId, getVideoComments);
  *       400:
  *         description: Bad request
  */
-// Add Comment in video
 router.route("/:videoId").post(verifyId, validate(commentValidationSchema), addComment);
 
-/**
+/** Update Comment
+ * 
  * @swagger
  * /comment/{commentId}:
  *   patch:
@@ -103,10 +104,10 @@ router.route("/:videoId").post(verifyId, validate(commentValidationSchema), addC
  *       404:
  *         description: Comment not found
  */
-// Update Comment
 router.route("/:commentId").patch(verifyId, validate(commentValidationSchema), updateComment);
 
-/**
+/** Delete Comment
+ * 
  * @swagger
  * /comment/{commentId}:
  *   delete:
@@ -125,7 +126,6 @@ router.route("/:commentId").patch(verifyId, validate(commentValidationSchema), u
  *       404:
  *         description: Comment not found
  */
-// Delete Comment
 router.route("/:commentId").delete(verifyId, deleteComment);
 
 export default router

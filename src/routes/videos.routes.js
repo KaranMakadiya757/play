@@ -20,7 +20,8 @@ const router = Router();
 // Secured Routes
 router.use(verifyJWT);
 
-/**
+/** Get All Videos
+ * 
  * @swagger
  * /video:
  *   get:
@@ -30,10 +31,30 @@ router.use(verifyJWT);
  *       200:
  *         description: List of videos fetched successfully
  */
-// Get All Videos
 router.route("/").get(getAllVideos)
 
-/**
+/** Get Video By ID
+ * @swagger
+ * /video/{videoId}:
+ *   get:
+ *     summary: Get video by ID
+ *     tags: [Video]
+ *     parameters:
+ *       - in: path
+ *         name: videoId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Video ID
+ *     responses:
+ *       200:
+ *         description: Video fetched successfully
+ *       404:
+ *         description: Video not found
+ */
+router.route("/:videoId").get(verifyId, getVideoById);
+
+/** Upload a Video
  * @swagger
  * /video:
  *   post:
@@ -67,7 +88,6 @@ router.route("/").get(getAllVideos)
  *       400:
  *         description: Bad request
  */
-// Upload a Video
 router.route("/").post(
     upload.fields([
         {
@@ -83,29 +103,8 @@ router.route("/").post(
     uploadVideo
 );
 
-/**
- * @swagger
- * /video/{videoId}:
- *   get:
- *     summary: Get video by ID
- *     tags: [Video]
- *     parameters:
- *       - in: path
- *         name: videoId
- *         schema:
- *           type: string
- *         required: true
- *         description: Video ID
- *     responses:
- *       200:
- *         description: Video fetched successfully
- *       404:
- *         description: Video not found
- */
-// Get Video By ID
-router.route("/:videoId").get(verifyId, getVideoById);
-
-/**
+/** Update Video By ID
+ * 
  * @swagger
  * /video/{videoId}:
  *   patch:
@@ -145,7 +144,6 @@ router.route("/:videoId").get(verifyId, getVideoById);
  *       404:
  *         description: Video not found
  */
-// Update Video By ID
 router.route("/:videoId").patch(
     verifyId,
     upload.single("thumbnail"),
@@ -153,7 +151,8 @@ router.route("/:videoId").patch(
     updateVideo
 );
 
-/**
+/** Toggle Publish
+ * 
  * @swagger
  * /video/toggle/publish/{videoId}:
  *   patch:
@@ -172,10 +171,10 @@ router.route("/:videoId").patch(
  *       404:
  *         description: Video not found
  */
-// Toggle Publish
 router.route("/toggle/publish/:videoId").patch(verifyId, togglePublishStatus);
 
-/**
+/** Delete Video By ID
+ * 
  * @swagger
  * /video/{videoId}:
  *   delete:
@@ -194,7 +193,6 @@ router.route("/toggle/publish/:videoId").patch(verifyId, togglePublishStatus);
  *       404:
  *         description: Video not found
  */
-// Delete Video By ID
 router.route("/:videoId").delete(verifyId, deleteVideo);
 
 

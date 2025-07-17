@@ -17,7 +17,21 @@ const router = Router();
 // Secured routes
 router.use(verifyJWT);
 
-/**
+/** Get user Tweets
+ * 
+ * @swagger
+ * /tweet/my-tweets:
+ *   get:
+ *     summary: Get all tweets for the current user
+ *     tags: [Tweet]
+ *     responses:
+ *       200:
+ *         description: List of tweets fetched successfully
+ */
+router.route("/my-tweets").get(getUserTweets);
+
+/** Create tweet
+ * 
  * @swagger
  * /tweet:
  *   post:
@@ -39,23 +53,10 @@ router.use(verifyJWT);
  *       400:
  *         description: Bad request
  */
-// Create tweet
 router.route("/").post(validate(tweetValidationSchema), createTweet);
 
-/**
- * @swagger
- * /tweet/my-tweets:
- *   get:
- *     summary: Get all tweets for the current user
- *     tags: [Tweet]
- *     responses:
- *       200:
- *         description: List of tweets fetched successfully
- */
-// Get user Tweets
-router.route("/my-tweets").get(getUserTweets);
-
-/**
+/** Update tweet
+ * 
  * @swagger
  * /tweet/{tweetId}:
  *   patch:
@@ -86,10 +87,10 @@ router.route("/my-tweets").get(getUserTweets);
  *       404:
  *         description: Tweet not found
  */
-// Update tweet
 router.route("/:tweetId").patch(verifyId, validate(tweetValidationSchema), updateTweet);
 
-/**
+/** Delete tweet
+ * 
  * @swagger
  * /tweet/{tweetId}:
  *   delete:
@@ -108,7 +109,6 @@ router.route("/:tweetId").patch(verifyId, validate(tweetValidationSchema), updat
  *       404:
  *         description: Tweet not found
  */
-// Delete tweet
 router.route("/:tweetId").delete(verifyId, deleteTweet);
 
 export default router

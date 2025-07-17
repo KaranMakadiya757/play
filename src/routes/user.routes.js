@@ -26,12 +26,14 @@ import validate from "../middlewares/validation.middleware.js";
 // create router instance
 const userRouter = Router();
 
-/**
+/** Reigster user
+ * 
  * @swagger
  * /user/register:
  *   post:
  *     summary: Register a new user
  *     tags: [Auth]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -65,8 +67,6 @@ const userRouter = Router();
  *       409:
  *         description: User already exists
  */
-
-// Reigster user
 userRouter.route("/register").post(
     upload.fields([
         { name: 'avatar', maxCount: 1 },
@@ -76,12 +76,14 @@ userRouter.route("/register").post(
     registerUser
 )
 
-/**
+/** Login
+ * 
  * @swagger
  * /user/login:
  *   post:
  *     summary: Login user
  *     tags: [Auth]
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
@@ -103,16 +105,15 @@ userRouter.route("/register").post(
  *       403:
  *         description: User does not exist
  */
-
-// Login 
 userRouter.route("/login").post(validate(userLoginValidationSchema), loginUser)
 
-/**
+/** Refresh Access Token
  * @swagger
  * /user/referesh-token:
  *   post:
  *     summary: Refresh access token
  *     tags: [Auth]
+ *     security: []
  *     requestBody:
  *       required: false
  *       content:
@@ -129,14 +130,64 @@ userRouter.route("/login").post(validate(userLoginValidationSchema), loginUser)
  *       401:
  *         description: Unauthorized request
  */
-
-// Refresh Access Token
 userRouter.route("/referesh-token").post(refereshAccessToken)
 
 // SECURED ROUTES
 userRouter.use(verifyJWT)
 
-/**
+/** Get Current User Information
+ * 
+ * @swagger
+ * /user/getcurrentuser:
+ *   get:
+ *     summary: Get current user information
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: User fetched successfully
+ *       401:
+ *         description: Unauthorized
+ */
+userRouter.route("/getcurrentuser").get(getCurrentUser)
+
+/** Get Channel Information By Channel Name
+ * 
+ * @swagger
+ * /user/c/{username}:
+ *   get:
+ *     summary: Get channel information by channel name
+ *     tags: [User]
+ *     parameters:
+ *       - in: path
+ *         name: username
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Channel username
+ *     responses:
+ *       200:
+ *         description: Channel information fetched successfully
+ *       404:
+ *         description: Channel does not exist
+ */
+userRouter.route("/c/:username").get(getUserChannelProfile)
+
+/** Get Watch History
+ * @swagger
+ * /user/history:
+ *   get:
+ *     summary: Get user watch history
+ *     tags: [User]
+ *     responses:
+ *       200:
+ *         description: Watch history fetched successfully
+ *       401:
+ *         description: Unauthorized
+ */
+userRouter.route("/history").get(getWatchHistory)
+
+/** Update User Details
+ * 
  * @swagger
  * /user/changeaccountdetails:
  *   patch:
@@ -170,8 +221,6 @@ userRouter.use(verifyJWT)
  *       400:
  *         description: Bad request
  */
-
-// Update User Details
 userRouter.route("/changeaccountdetails").patch(
     upload.fields([
         { name: 'avatar', maxCount: 1 },
@@ -181,62 +230,8 @@ userRouter.route("/changeaccountdetails").patch(
     updateAccountDetails
 )
 
-/**
- * @swagger
- * /user/getcurrentuser:
- *   get:
- *     summary: Get current user information
- *     tags: [User]
- *     responses:
- *       200:
- *         description: User fetched successfully
- *       401:
- *         description: Unauthorized
- */
-
-// Get Current User Information
-userRouter.route("/getcurrentuser").get(getCurrentUser)
-
-/**
- * @swagger
- * /user/c/{username}:
- *   get:
- *     summary: Get channel information by channel name
- *     tags: [User]
- *     parameters:
- *       - in: path
- *         name: username
- *         schema:
- *           type: string
- *         required: true
- *         description: Channel username
- *     responses:
- *       200:
- *         description: Channel information fetched successfully
- *       404:
- *         description: Channel does not exist
- */
-
-// Get Channel Information By Channel Name
-userRouter.route("/c/:username").get(getUserChannelProfile)
-
-/**
- * @swagger
- * /user/history:
- *   get:
- *     summary: Get user watch history
- *     tags: [User]
- *     responses:
- *       200:
- *         description: Watch history fetched successfully
- *       401:
- *         description: Unauthorized
- */
-
-// Get Watch History
-userRouter.route("/history").get(getWatchHistory)
-
-/**
+/** Change Password
+ * 
  * @swagger
  * /user/changepassword:
  *   patch:
@@ -261,11 +256,10 @@ userRouter.route("/history").get(getWatchHistory)
  *       400:
  *         description: Invalid password
  */
-
-// Change Password
 userRouter.route("/changepassword").patch(validate(changepasswordValidationSchema), changeCurrentPassword)
 
-/**
+/** Logout
+ * 
  * @swagger
  * /user/logout:
  *   post:
@@ -277,11 +271,9 @@ userRouter.route("/changepassword").patch(validate(changepasswordValidationSchem
  *       500:
  *         description: Internal server error
  */
-
-// Logout
 userRouter.route("/logout").post(logoutUser)
 
-/**
+/** Delete User By ID
  * @swagger
  * /user:
  *   delete:
@@ -293,8 +285,6 @@ userRouter.route("/logout").post(logoutUser)
  *       404:
  *         description: User not found
  */
-
-// Delete User By ID
 userRouter.route("/").delete(deleteUser);
 
 export default userRouter;
