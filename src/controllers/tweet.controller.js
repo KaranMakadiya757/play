@@ -12,7 +12,20 @@ const getUserTweets = asyncHandler(async (req, res) => {
             $match: {
                 owner: req.user._id
             }
-        }
+        },
+        {
+            $lookup: {
+                from: "likes",
+                localField: "_id",
+                foreignField: "tweet",
+                as: "likes"
+            }
+        },
+        {
+            $addFields: {
+                likes: { $size: "$likes" }
+            }
+        },
     ]);
 
     // Throw error if comments are not found
