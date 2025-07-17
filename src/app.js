@@ -2,7 +2,7 @@ import cors from "cors";
 import express from "express";
 import cookieparser from "cookie-parser";
 import errorHandler from "./middlewares/errorhandler.middleware.js";
-import { swaggerUi, swaggerSpec } from "../swagger.js";
+import { swaggerUi, swaggerSpec } from "./swagger.js";
 
 // EXPRESS APP CREATION 
 const app = express()

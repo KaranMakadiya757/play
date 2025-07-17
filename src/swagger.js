@@ -12,7 +12,7 @@ const options = {
     servers: [
       {
         url: process.env.API_URL,
-        description: 'Local server'
+        description: 'Version 1.0.0'
       }
     ]
   },
