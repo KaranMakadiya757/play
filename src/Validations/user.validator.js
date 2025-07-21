@@ -136,6 +136,46 @@ const userLoginValidationSchema = Joi.object({
         })
 });
 
+const userLoginWithOtpValidationSchema = Joi.object({
+    email: Joi.string()
+        .trim()
+        .lowercase()
+        .email()
+        .required()
+        .messages({
+            'string.base': 'Email must be a string',
+            'string.empty': 'Email is required',
+            'string.email': 'Email must be a valid email address',
+            'any.required': 'Email is required'
+        })
+});
+
+const userOtpValidationSchema = Joi.object({
+    email: Joi.string()
+        .trim()
+        .lowercase()
+        .email()
+        .required()
+        .messages({
+            'string.base': 'Email must be a string',
+            'string.empty': 'Email is required',
+            'string.email': 'Email must be a valid email address',
+            'any.required': 'Email is required'
+        }),
+
+    otp: Joi.number()
+        .integer()
+        .min(100000)
+        .max(999999)
+        .required()
+        .messages({
+            'number.base': 'OTP must be a number',
+            'number.min': 'OTP must be 6 digits long',
+            'number.max': 'OTP must be 6 digits long',
+            'any.required': 'OTP is required'
+        })
+});
+
 const changepasswordValidationSchema = Joi.object({
     oldPassword: Joi.string()
         .required()
@@ -166,5 +206,7 @@ export {
     userValidationSchema,
     userLoginValidationSchema,
     changepasswordValidationSchema,
-    userUpdateValidationSchema
+    userUpdateValidationSchema,
+    userLoginWithOtpValidationSchema,
+    userOtpValidationSchema
 };

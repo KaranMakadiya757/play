@@ -51,16 +51,23 @@ const userSchema = new Schema(
         password: {
             type: String,
             required: [true, "Please Enter Valid password"]
+        },
+        otp: {
+            type: String
+        },
+        otp_expiry: {
+            type: Date
         }
     },
     { timestamps: true }
 )
 
 userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
+    if (this.isModified("password")) this.password = await bcrypt.hash(this.password, 10);
 
-    this.password = await bcrypt.hash(this.password, 10)
-    next()
+    if (this.isModified("otp") && this.otp) this.otp = await bcrypt.hash(this.otp, 10);
+
+    next();
 })
 
 userSchema.pre("findOneAndDelete", async function (next) {
@@ -82,6 +89,15 @@ userSchema.pre("findOneAndDelete", async function (next) {
 
 userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password)
+}
+
+userSchema.methods.isOtpCorrect = async function (otp) {
+    if (!this.otp) return false;
+
+    const isVerified = await bcrypt.compare(otp, this.otp)
+    const isExpired = Date.now() < this.otp_expiry
+
+    return isVerified && isExpired;
 }
 
 userSchema.methods.generateAccessToken = function () {
