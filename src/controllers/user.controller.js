@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken"
 import mongoose from "mongoose";
 import { sendEmail } from "../utils/sendmail.js";
 import { welcomeTemplate } from "../Templates/welcomeTemplate.js"
+import { otpTemplate } from "../Templates/otpTemplate.js"
 
 // Register User
 const registerUser = asyncHandler(async (req, res) => {
@@ -72,7 +73,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const user = await User.create(req.body);
 
     // GET THE CREATED USER WITHOUT THE PASSWORD AND REFERESH FIELDS AND THROW ERROR IF USER DOES NOT EXISTS 
-    const createduser = await User.findById(user._id).select("-password -refreshToken");
+    const createduser = await User.findById(user._id).select("-password -refreshToken -otp -otp_expiry");
 
     // throw error if user is not created
     if (!createduser) throw new ApiError(500, "Internal server error");
@@ -80,7 +81,7 @@ const registerUser = asyncHandler(async (req, res) => {
     // Send welcome email
     await sendEmail({
         to: user.email,
-        subject: "Welcome to Task Manager!",
+        subject: "Welcome to PlayTube!",
         html: welcomeTemplate(user.fullname),
     });
 
@@ -137,7 +138,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user)
 
     // GET THE LOGGED IN USER
-    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken -otp -otp_expiry")
 
     // RETURN THE RESPONSE 
     return res
@@ -153,6 +154,93 @@ const loginUser = asyncHandler(async (req, res) => {
                     refreshToken
                 },
                 "User Logged In Successfully"
+            )
+        )
+})
+
+// Send OTP
+const sendOTP = asyncHandler(async (req, res) => {
+
+    // GET USERNAME , EMAIL AND PASSWORD FROM THE REQUEST BODY
+    const { email } = req.body
+
+    // FIND THE USER BY USERNAME OR EMAIL AND THROW ERROR IF USER DOES NOT EXISTS
+    const user = await User.findOne({
+        $or: [{ email }]
+    });
+
+    // Throw error if user does not exist
+    if (!user) throw new ApiError(403, "", ["user does not exist"]);
+
+    // Generate OTP
+    const otp = Math.floor(100000 + Math.random() * 900000);
+
+    // set otp and otp expiry in the user model
+    user.otp = otp;
+    user.otp_expiry = new Date(Date.now() + 5 * 60 * 1000);
+
+    // Send otp in the mail
+    await sendEmail({
+        to: user.email,
+        subject: "OTP for playtube login!",
+        html: otpTemplate(user.fullname, otp),
+    });
+
+    // Save user model
+    await user.save()
+
+    // RETURN THE RESPONSE 
+    return res
+        .status(200)
+        .json(new ApiResponse(200, {}, "OTP sent successfully !! Check your registered Email for the same"))
+})
+
+// Verify OTP
+const verifyOTP = asyncHandler(async (req, res) => {
+
+    // GET USERNAME , EMAIL AND PASSWORD FROM THE REQUEST BODY
+    const { email, otp } = req.body
+
+    // FIND THE USER BY USERNAME OR EMAIL AND THROW ERROR IF USER DOES NOT EXISTS
+    const user = await User.findOne({
+        $or: [{ email }]
+    });
+
+    // Throw error if user does not exist
+    if (!user) throw new ApiError(403, "", ["user does not exist"]);
+
+    // CHECK WEATHER THE OTP IS CORRECT AND THROW ERROR IS THE PASSWORD IS INCORRECT
+    const isOTPValid = await user.isOtpCorrect(otp.toString())
+
+    // Throw error
+    if (!isOTPValid) throw new ApiError(401, "Invalid OTP !!!");
+
+
+    // GENERATING THE FERERESH AND ACCESS TOKENS
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user)
+
+    // Remove the OTP and OTP expiry from db
+    user.otp = undefined
+    user.otp_expiry = undefined
+    await user.save()
+
+    // GET THE LOGGED IN USER
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken -otp -otp_expiry")
+
+    // RETURN THE RESPONSE 
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, cookieOption)
+        .cookie("refreshToken", refreshToken, cookieOption)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    user: loggedInUser,
+                    accessToken,
+                    refreshToken
+                },
+                "OTP Verified !!! Logged in Successfully"
             )
         )
 })
@@ -300,7 +388,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         {
             new: true,
         }
-    ).select("-password -refreshToken")
+    ).select("-password -refreshToken -otp -otp_expiry")
 
     //  RETURN THE RESPONSE
     return res
@@ -455,6 +543,8 @@ const deleteUser = asyncHandler(async (req, res) => {
 export {
     registerUser,
     loginUser,
+    sendOTP,
+    verifyOTP,
     logoutUser,
     refereshAccessToken,
     changeCurrentPassword,

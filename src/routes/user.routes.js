@@ -11,12 +11,16 @@ import {
     registerUser,
     updateAccountDetails,
     refereshAccessToken,
-    deleteUser
+    deleteUser,
+    sendOTP,
+    verifyOTP
 } from "../controllers/user.controller.js";
 
 import {
     changepasswordValidationSchema,
     userLoginValidationSchema,
+    userLoginWithOtpValidationSchema,
+    userOtpValidationSchema,
     userUpdateValidationSchema,
     userValidationSchema
 } from "../Validations/user.validator.js";
@@ -106,6 +110,63 @@ userRouter.route("/register").post(
  *         description: User does not exist
  */
 userRouter.route("/login").post(validate(userLoginValidationSchema), loginUser)
+
+/** Send OTp
+ * @swagger
+ * /user/login/send-otp:
+ *   post:
+ *     summary: Send OTP to user email for login
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: johndoe@email.com
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: User not found
+ */
+userRouter.route("/login/send-otp").post(validate(userLoginWithOtpValidationSchema), sendOTP)
+
+/** Verify OTP
+ * @swagger
+ * /user/login/verify-otp:
+ *   post:
+ *     summary: Verify OTP for user login
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: johndoe@email.com
+ *               otp:
+ *                 type: string
+ *                 example: "123456"
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully, user logged in
+ *       400:
+ *         description: Invalid or expired OTP
+ *       404:
+ *         description: User not found
+ */
+userRouter.route("/login/verify-otp").post(validate(userOtpValidationSchema), verifyOTP)
 
 /** Refresh Access Token
  * @swagger
