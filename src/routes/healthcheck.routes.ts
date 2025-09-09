@@ -13,7 +13,9 @@ const router = Router();
  *     security: []
  *     responses:
  *       200:
- *         description: Servers Are running
+ *         $ref: '#/components/responses/HealthcheckResponse'
+ *       500:
+ *         $ref: '#/components/responses/ServerError'
  */
 router.route("/").get(healthcheck);
 

@@ -37,16 +37,12 @@ router.route("/my-tweets").get(getUserTweets);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               content:
- *                 type: string
- *                 example: This is my tweet!
+ *             $ref: '#/components/schemas/CreateTweetRequest'
  *     responses:
  *       201:
- *         description: Tweet created successfully
+ *         $ref: '#/components/responses/CreateTweetResponse'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/ValidationError'
  */
 router.route("/").post(validate(tweetValidationSchema), createTweet);
 
@@ -69,18 +65,14 @@ router.route("/").post(validate(tweetValidationSchema), createTweet);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               content:
- *                 type: string
- *                 example: Updated tweet content
+ *             $ref: '#/components/schemas/UpdateTweetRequest'
  *     responses:
  *       200:
- *         description: Tweet updated successfully
+ *         $ref: '#/components/responses/UpdateTweetResponse'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/ValidationError'
  *       404:
- *         description: Tweet not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/:tweetId").patch(verifyId, validate(tweetValidationSchema), updateTweet);
 
@@ -100,9 +92,9 @@ router.route("/:tweetId").patch(verifyId, validate(tweetValidationSchema), updat
  *         description: Tweet ID
  *     responses:
  *       200:
- *         description: Tweet deleted successfully
+ *         $ref: '#/components/responses/DeleteTweetResponse'
  *       404:
- *         description: Tweet not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/:tweetId").delete(verifyId, deleteTweet);
 

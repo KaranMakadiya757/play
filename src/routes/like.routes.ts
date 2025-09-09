@@ -19,7 +19,7 @@ router.use(verifyJWT);
  *     tags: [Like]
  *     responses:
  *       200:
- *         description: List of liked videos fetched successfully
+ *         $ref: '#/components/responses/GetLikedVideosResponse'
  */
 router.route("/videos").get(getLikedVideos);
 
@@ -39,9 +39,9 @@ router.route("/videos").get(getLikedVideos);
  *         description: Video ID
  *     responses:
  *       200:
- *         description: Like toggled successfully
+ *         $ref: '#/components/responses/ToggleVideoLikeResponse'
  *       404:
- *         description: Video not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/toggle/v/:videoId").post(verifyId, toggleVideoLike);
 
@@ -61,9 +61,9 @@ router.route("/toggle/v/:videoId").post(verifyId, toggleVideoLike);
  *         description: Comment ID
  *     responses:
  *       200:
- *         description: Like toggled successfully
+ *         $ref: '#/components/responses/ToggleCommentLikeResponse'
  *       404:
- *         description: Comment not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/toggle/c/:commentId").post(verifyId, toggleCommentLike);
 
@@ -83,9 +83,9 @@ router.route("/toggle/c/:commentId").post(verifyId, toggleCommentLike);
  *         description: Tweet ID
  *     responses:
  *       200:
- *         description: Like toggled successfully
+ *         $ref: '#/components/responses/ToggleTweetLikeResponse'
  *       404:
- *         description: Tweet not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/toggle/t/:tweetId").post(verifyId, toggleTweetLike);
 
