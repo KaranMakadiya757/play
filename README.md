@@ -11,7 +11,7 @@
 
 > The PlayTube is a backend service built with Node.js and Express that replicates core features of YouTube.
 
-### ✨ [Demo](https://api-playtube.onrender.com/api/v1healthcheck)
+### ✨ [Demo](https://api-playtube.onrender.com/api/v1/healthcheck)
 
 ## Install
 
