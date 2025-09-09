@@ -43,33 +43,14 @@ const userRouter = Router();
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *                 example: johndoe
- *               email:
- *                 type: string
- *                 example: johndoe@email.com
- *               fullname:
- *                 type: string
- *                 example: John Doe
- *               password:
- *                 type: string
- *                 example: Password@123
- *               avatar:
- *                 type: string
- *                 format: binary
- *               coverimage:
- *                 type: string
- *                 format: binary
+ *             $ref: '#/components/schemas/RegisterRequest'
  *     responses:
  *       201:
- *         description: User registered successfully
+ *         $ref: '#/components/responses/RegisterResponse'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/ValidationError'
  *       409:
- *         description: User already exists
+ *         $ref: '#/components/responses/ConflictError'
  */
 userRouter.route("/register").post(
     upload.fields([
@@ -93,21 +74,14 @@ userRouter.route("/register").post(
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: johndoe@email.com
- *               password:
- *                 type: string
- *                 example: Password@123
+ *             $ref: '#/components/schemas/LoginRequest'
  *     responses:
  *       200:
- *         description: User logged in successfully
+ *         $ref: '#/components/responses/LoginResponse'
  *       401:
- *         description: Invalid credentials
+ *         $ref: '#/components/responses/UnauthorizedError'
  *       403:
- *         description: User does not exist
+ *         $ref: '#/components/responses/ForbiddenError'
  */
 userRouter.route("/login").post(validate(userLoginValidationSchema), loginUser);
 
@@ -123,18 +97,14 @@ userRouter.route("/login").post(validate(userLoginValidationSchema), loginUser);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: johndoe@email.com
+ *             $ref: '#/components/schemas/SendOtpRequest'
  *     responses:
  *       200:
- *         description: OTP sent successfully
+ *         $ref: '#/components/responses/SendOtpResponse'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/ValidationError'
  *       404:
- *         description: User not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 userRouter.route("/login/send-otp").post(validate(userLoginWithOtpValidationSchema), sendOTP);
 
@@ -150,21 +120,14 @@ userRouter.route("/login/send-otp").post(validate(userLoginWithOtpValidationSche
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: johndoe@email.com
- *               otp:
- *                 type: string
- *                 example: "123456"
+ *             $ref: '#/components/schemas/VerifyOtpRequest'
  *     responses:
  *       200:
- *         description: OTP verified successfully, user logged in
+ *         $ref: '#/components/responses/VerifyOtpResponse'
  *       400:
- *         description: Invalid or expired OTP
+ *         $ref: '#/components/responses/ValidationError'
  *       404:
- *         description: User not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 userRouter.route("/login/verify-otp").post(validate(userOtpValidationSchema), verifyOTP);
 
@@ -187,9 +150,9 @@ userRouter.route("/login/verify-otp").post(validate(userOtpValidationSchema), ve
  *                 example: <refresh_token>
  *     responses:
  *       200:
- *         description: Token refreshed successfully
+ *         $ref: '#/components/responses/RefreshTokenResponse'
  *       401:
- *         description: Unauthorized request
+ *         $ref: '#/components/responses/UnauthorizedError'
  */
 userRouter.route("/referesh-token").post(refereshAccessToken);
 
@@ -205,9 +168,9 @@ userRouter.use(verifyJWT);
  *     tags: [User]
  *     responses:
  *       200:
- *         description: User fetched successfully
+ *         $ref: '#/components/responses/GetCurrentUserResponse'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/UnauthorizedError'
  */
 userRouter.route("/getcurrentuser").get(getCurrentUser);
 
@@ -227,9 +190,9 @@ userRouter.route("/getcurrentuser").get(getCurrentUser);
  *         description: Channel username
  *     responses:
  *       200:
- *         description: Channel information fetched successfully
+ *         $ref: '#/components/responses/GetChannelProfileResponse'
  *       404:
- *         description: Channel does not exist
+ *         $ref: '#/components/responses/NotFoundError'
  */
 userRouter.route("/c/:username").get(getUserChannelProfile);
 
@@ -241,9 +204,9 @@ userRouter.route("/c/:username").get(getUserChannelProfile);
  *     tags: [User]
  *     responses:
  *       200:
- *         description: Watch history fetched successfully
+ *         $ref: '#/components/responses/GetWatchHistoryResponse'
  *       401:
- *         description: Unauthorized
+ *         $ref: '#/components/responses/UnauthorizedError'
  */
 userRouter.route("/history").get(getWatchHistory);
 
@@ -259,28 +222,12 @@ userRouter.route("/history").get(getWatchHistory);
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             properties:
- *               username:
- *                 type: string
- *                 example: johndoe
- *               email:
- *                 type: string
- *                 example: johndoe@email.com
- *               fullname:
- *                 type: string
- *                 example: John Doe
- *               avatar:
- *                 type: string
- *                 format: binary
- *               coverimage:
- *                 type: string
- *                 format: binary
+ *             $ref: '#/components/schemas/UpdateAccountDetailsRequest'
  *     responses:
  *       200:
- *         description: Account details updated successfully
+ *         $ref: '#/components/responses/UpdateAccountDetailsResponse'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/ValidationError'
  */
 userRouter.route("/changeaccountdetails").patch(
     upload.fields([
@@ -303,19 +250,12 @@ userRouter.route("/changeaccountdetails").patch(
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               oldPassword:
- *                 type: string
- *                 example: OldPassword@123
- *               newPassword:
- *                 type: string
- *                 example: NewPassword@123
+ *             $ref: '#/components/schemas/ChangePasswordRequest'
  *     responses:
  *       200:
- *         description: Password changed successfully
+ *         $ref: '#/components/responses/ChangePasswordResponse'
  *       400:
- *         description: Invalid password
+ *         $ref: '#/components/responses/ValidationError'
  */
 userRouter.route("/changepassword").patch(validate(changepasswordValidationSchema), changeCurrentPassword);
 
@@ -328,9 +268,9 @@ userRouter.route("/changepassword").patch(validate(changepasswordValidationSchem
  *     tags: [Auth]
  *     responses:
  *       200:
- *         description: Logged out successfully
+ *         $ref: '#/components/responses/LogoutResponse'
  *       500:
- *         description: Internal server error
+ *         $ref: '#/components/responses/ServerError'
  */
 userRouter.route("/logout").post(logoutUser);
 
@@ -342,9 +282,9 @@ userRouter.route("/logout").post(logoutUser);
  *     tags: [User]
  *     responses:
  *       200:
- *         description: User deleted successfully
+ *         $ref: '#/components/responses/DeleteUserResponse'
  *       404:
- *         description: User not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 userRouter.route("/").delete(deleteUser);
 

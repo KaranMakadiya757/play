@@ -28,7 +28,7 @@ router.use(verifyJWT);
  *     tags: [Video]
  *     responses:
  *       200:
- *         description: List of videos fetched successfully
+ *         $ref: '#/components/responses/GetVideosResponse'
  */
 router.route("/").get(getAllVideos);
 
@@ -47,9 +47,9 @@ router.route("/").get(getAllVideos);
  *         description: Video ID
  *     responses:
  *       200:
- *         description: Video fetched successfully
+ *         $ref: '#/components/responses/GetVideoResponse'
  *       404:
- *         description: Video not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/:videoId").get(verifyId, getVideoById);
 
@@ -64,28 +64,12 @@ router.route("/:videoId").get(verifyId, getVideoById);
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             properties:
- *               video:
- *                 type: string
- *                 format: binary
- *               thumbnail:
- *                 type: string
- *                 format: binary
- *               title:
- *                 type: string
- *                 example: My Video
- *               description:
- *                 type: string
- *                 example: Video description
- *               isPublished:
- *                 type: boolean
- *                 example: true
+ *             $ref: '#/components/schemas/UploadVideoRequest'
  *     responses:
  *       201:
- *         description: Video uploaded successfully
+ *         $ref: '#/components/responses/UploadVideoResponse'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/ValidationError'
  */
 router.route("/").post(
     upload.fields([
@@ -121,27 +105,14 @@ router.route("/").post(
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             properties:
- *               thumbnail:
- *                 type: string
- *                 format: binary
- *               title:
- *                 type: string
- *                 example: Updated Video Title
- *               description:
- *                 type: string
- *                 example: Updated description
- *               isPublished:
- *                 type: boolean
- *                 example: false
+ *             $ref: '#/components/schemas/UpdateVideoRequest'
  *     responses:
  *       200:
- *         description: Video updated successfully
+ *         $ref: '#/components/responses/UpdateVideoResponse'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/ValidationError'
  *       404:
- *         description: Video not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/:videoId").patch(verifyId, upload.single("thumbnail"), validate(videoValidationSchema), updateVideo);
 
@@ -161,9 +132,9 @@ router.route("/:videoId").patch(verifyId, upload.single("thumbnail"), validate(v
  *         description: Video ID
  *     responses:
  *       200:
- *         description: Video publish status toggled successfully
+ *         $ref: '#/components/responses/TogglePublishResponse'
  *       404:
- *         description: Video not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/toggle/publish/:videoId").patch(verifyId, togglePublishStatus);
 
@@ -183,9 +154,9 @@ router.route("/toggle/publish/:videoId").patch(verifyId, togglePublishStatus);
  *         description: Video ID
  *     responses:
  *       200:
- *         description: Video deleted successfully
+ *         $ref: '#/components/responses/DeleteVideoResponse'
  *       404:
- *         description: Video not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/:videoId").delete(verifyId, deleteVideo);
 

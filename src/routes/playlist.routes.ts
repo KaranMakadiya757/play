@@ -29,7 +29,7 @@ router.use(verifyJWT);
  *     tags: [Playlist]
  *     responses:
  *       200:
- *         description: List of playlists fetched successfully
+ *         $ref: '#/components/responses/GetMyPlaylistsResponse'
  */
 router.route("/my-playlists").get(getUserPlaylists);
 
@@ -49,9 +49,9 @@ router.route("/my-playlists").get(getUserPlaylists);
  *         description: Playlist ID
  *     responses:
  *       200:
- *         description: Playlist fetched successfully
+ *         $ref: '#/components/responses/GetPlaylistResponse'
  *       404:
- *         description: Playlist not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/:playlistId").get(verifyId, getPlaylistById);
 
@@ -67,19 +67,12 @@ router.route("/:playlistId").get(verifyId, getPlaylistById);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: My Playlist
- *               description:
- *                 type: string
- *                 example: Playlist description
+ *             $ref: '#/components/schemas/CreatePlaylistRequest'
  *     responses:
  *       201:
- *         description: Playlist created successfully
+ *         $ref: '#/components/responses/CreatePlaylistResponse'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/ValidationError'
  */
 router.route("/").post(validate(playlistValidationSchema), createPlaylist);
 
@@ -102,21 +95,14 @@ router.route("/").post(validate(playlistValidationSchema), createPlaylist);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *                 example: Updated Playlist
- *               description:
- *                 type: string
- *                 example: Updated description
+ *             $ref: '#/components/schemas/UpdatePlaylistRequest'
  *     responses:
  *       200:
- *         description: Playlist updated successfully
+ *         $ref: '#/components/responses/UpdatePlaylistResponse'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/ValidationError'
  *       404:
- *         description: Playlist not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/:playlistId").patch(validate(playlistValidationSchema), verifyId, updatePlaylist);
 
@@ -142,9 +128,9 @@ router.route("/:playlistId").patch(validate(playlistValidationSchema), verifyId,
  *         description: Playlist ID
  *     responses:
  *       200:
- *         description: Video added to playlist successfully
+ *         $ref: '#/components/responses/AddVideoToPlaylistResponse'
  *       404:
- *         description: Playlist or video not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/add/:videoId/:playlistId").patch(verifyId, addVideoToPlaylist);
 
@@ -170,9 +156,9 @@ router.route("/add/:videoId/:playlistId").patch(verifyId, addVideoToPlaylist);
  *         description: Playlist ID
  *     responses:
  *       200:
- *         description: Video removed from playlist successfully
+ *         $ref: '#/components/responses/RemoveVideoFromPlaylistResponse'
  *       404:
- *         description: Playlist or video not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/remove/:videoId/:playlistId").patch(verifyId, removeVideoFromPlaylist);
 
@@ -192,9 +178,9 @@ router.route("/remove/:videoId/:playlistId").patch(verifyId, removeVideoFromPlay
  *         description: Playlist ID
  *     responses:
  *       200:
- *         description: Playlist deleted successfully
+ *         $ref: '#/components/responses/DeletePlaylistResponse'
  *       404:
- *         description: Playlist not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/:playlistId").delete(verifyId, deletePlaylist);
 

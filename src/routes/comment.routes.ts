@@ -1,16 +1,10 @@
-import { Router } from 'express';
-import verifyId from '../middlewares/verifyId.middleware';
+import { Router } from "express";
+import verifyId from "../middlewares/verifyId.middleware";
 import { verifyJWT } from "../middlewares/auth.middleware";
 import validate from "../middlewares/validation.middleware";
-import { commentValidationSchema } from '../Validations/comment.validator';
+import { commentValidationSchema } from "../Validations/comment.validator";
 
-import {
-    addComment,
-    deleteComment,
-    getVideoComments,
-    updateComment,
-} from "../controllers/comment.controller"
-
+import { addComment, deleteComment, getVideoComments, updateComment } from "../controllers/comment.controller";
 
 // Router Instance
 const router = Router();
@@ -19,7 +13,7 @@ const router = Router();
 router.use(verifyJWT);
 
 /** Get video Comments
- * 
+ *
  * @swagger
  * /comment/{videoId}:
  *   get:
@@ -34,14 +28,14 @@ router.use(verifyJWT);
  *         description: Video ID
  *     responses:
  *       200:
- *         description: List of comments fetched successfully
+ *         $ref: '#/components/responses/GetVideoCommentsResponse'
  *       404:
- *         description: Video not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/:videoId").get(verifyId, getVideoComments);
 
 /** Add Comment in video
- * 
+ *
  * @swagger
  * /comment/{videoId}:
  *   post:
@@ -59,21 +53,17 @@ router.route("/:videoId").get(verifyId, getVideoComments);
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               content:
- *                 type: string
- *                 example: Nice video!
+ *             $ref: '#/components/schemas/AddCommentRequest'
  *     responses:
  *       201:
- *         description: Comment added successfully
+ *         $ref: '#/components/responses/AddCommentResponse'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/ValidationError'
  */
 router.route("/:videoId").post(verifyId, validate(commentValidationSchema), addComment);
 
 /** Update Comment
- * 
+ *
  * @swagger
  * /comment/{commentId}:
  *   patch:
@@ -91,23 +81,19 @@ router.route("/:videoId").post(verifyId, validate(commentValidationSchema), addC
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               content:
- *                 type: string
- *                 example: Updated comment
+ *             $ref: '#/components/schemas/UpdateCommentRequest'
  *     responses:
  *       200:
- *         description: Comment updated successfully
+ *         $ref: '#/components/responses/UpdateCommentResponse'
  *       400:
- *         description: Bad request
+ *         $ref: '#/components/responses/ValidationError'
  *       404:
- *         description: Comment not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/:commentId").patch(verifyId, validate(commentValidationSchema), updateComment);
 
 /** Delete Comment
- * 
+ *
  * @swagger
  * /comment/{commentId}:
  *   delete:
@@ -122,10 +108,10 @@ router.route("/:commentId").patch(verifyId, validate(commentValidationSchema), u
  *         description: Comment ID
  *     responses:
  *       200:
- *         description: Comment deleted successfully
+ *         $ref: '#/components/responses/DeleteCommentResponse'
  *       404:
- *         description: Comment not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/:commentId").delete(verifyId, deleteComment);
 
-export default router
+export default router;

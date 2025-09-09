@@ -22,7 +22,9 @@ router.use(verifyJWT);
  *     tags: [Subscription]
  *     responses:
  *       200:
- *         description: List of subscribers fetched successfully
+ *         $ref: '#/components/responses/GetSubscribersResponse'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
  */
 router.route("/my-subscribers").get(getUserChannelSubscribers);
 
@@ -35,7 +37,9 @@ router.route("/my-subscribers").get(getUserChannelSubscribers);
  *     tags: [Subscription]
  *     responses:
  *       200:
- *         description: List of subscriptions fetched successfully
+ *         $ref: '#/components/responses/GetSubscriptionsResponse'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
  */
 router.route("/my-subscriptions").get(getSubscribedChannels);
 
@@ -55,9 +59,9 @@ router.route("/my-subscriptions").get(getSubscribedChannels);
  *         description: Channel ID
  *     responses:
  *       200:
- *         description: Subscription toggled successfully
+ *         $ref: '#/components/responses/ToggleSubscriptionResponse'
  *       404:
- *         description: Channel not found
+ *         $ref: '#/components/responses/NotFoundError'
  */
 router.route("/c/:channelId").post(verifyId, toggleSubscription);
 
