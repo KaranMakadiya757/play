@@ -1,10 +1,6 @@
 {
-    "watch": [
-        "src"
-    ],
+    "watch": ["src"],
     "ext": "ts",
-    "ignore": [
-        "dist"
-    ],
-    "exec": "node --loader ts-node/esm --no-warnings=ExperimentalWarning ./src/index.ts"
+    "ignore": ["src/**/*.spec.ts"],
+    "exec": "ts-node src/index.ts"
 }
