@@ -2,6 +2,7 @@
     "name": "play",
     "version": "1.0.0",
     "description": "youtube clone",
+    "type": "module",
     "main": "index.js",
     "scripts": {
         "build": "tsc",
