@@ -46,4 +46,4 @@ app.use("/api/v1/dashboard", dashboardRouter);
 
 app.use(errorHandler);
 
-export { app };
+export default app;
